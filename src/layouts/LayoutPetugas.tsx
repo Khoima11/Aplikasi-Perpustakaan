@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/KonteksAuth'
 import Ikon, { type NamaIkon } from '../components/Ikon'
@@ -102,7 +102,9 @@ export default function LayoutPetugas() {
           <div className="fixed inset-0 top-16 z-10 bg-black/30 lg:hidden" onClick={() => setMenuTerbuka(false)} />
         )}
         <main className="min-w-0 flex-1 p-4 sm:p-6">
-          <Outlet />
+          <Suspense fallback={<p className="text-sm text-slate-500">Memuat...</p>}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

@@ -1,31 +1,35 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import LayoutPetugas from './layouts/LayoutPetugas'
 import LayoutAnggota from './layouts/LayoutAnggota'
 import Login from './pages/Login'
-import GantiKataSandi from './pages/GantiKataSandi'
-import Dashboard from './pages/petugas/Dashboard'
-import DataKategori from './pages/petugas/DataKategori'
-import DataBuku from './pages/petugas/DataBuku'
-import DetailBuku from './pages/petugas/DetailBuku'
-import DataAnggota from './pages/petugas/DataAnggota'
-import Peminjaman from './pages/petugas/Peminjaman'
-import BuktiPeminjaman from './pages/petugas/BuktiPeminjaman'
-import Pengembalian from './pages/petugas/Pengembalian'
-import Keterlambatan from './pages/petugas/Keterlambatan'
-import Laporan from './pages/petugas/Laporan'
-import Pengaturan from './pages/petugas/Pengaturan'
-import Beranda from './pages/anggota/Beranda'
-import Katalog from './pages/anggota/Katalog'
-import DetailBukuAnggota from './pages/anggota/DetailBukuAnggota'
-import PinjamanSaya from './pages/anggota/PinjamanSaya'
-import Profil from './pages/anggota/Profil'
-import UbahKataSandi from './pages/petugas/UbahKataSandi'
-import { ArahkanAwal, HanyaTamu, WajibLogin } from './auth/Penjaga'
+import { ArahkanAwal, HanyaTamu, LayarMemuat, WajibLogin } from './auth/Penjaga'
+
+// Halaman dimuat saat dibutuhkan, agar HP anggota tidak mengunduh kode halaman petugas
+const GantiKataSandi = lazy(() => import('./pages/GantiKataSandi'))
+const Dashboard = lazy(() => import('./pages/petugas/Dashboard'))
+const DataKategori = lazy(() => import('./pages/petugas/DataKategori'))
+const DataBuku = lazy(() => import('./pages/petugas/DataBuku'))
+const DetailBuku = lazy(() => import('./pages/petugas/DetailBuku'))
+const DataAnggota = lazy(() => import('./pages/petugas/DataAnggota'))
+const Peminjaman = lazy(() => import('./pages/petugas/Peminjaman'))
+const BuktiPeminjaman = lazy(() => import('./pages/petugas/BuktiPeminjaman'))
+const Pengembalian = lazy(() => import('./pages/petugas/Pengembalian'))
+const Keterlambatan = lazy(() => import('./pages/petugas/Keterlambatan'))
+const Laporan = lazy(() => import('./pages/petugas/Laporan'))
+const Pengaturan = lazy(() => import('./pages/petugas/Pengaturan'))
+const Beranda = lazy(() => import('./pages/anggota/Beranda'))
+const Katalog = lazy(() => import('./pages/anggota/Katalog'))
+const DetailBukuAnggota = lazy(() => import('./pages/anggota/DetailBukuAnggota'))
+const PinjamanSaya = lazy(() => import('./pages/anggota/PinjamanSaya'))
+const Profil = lazy(() => import('./pages/anggota/Profil'))
+const UbahKataSandi = lazy(() => import('./pages/petugas/UbahKataSandi'))
 
 // Setiap kelompok halaman dijaga sesuai peran. Penjagaan di sini hanya untuk
 // kenyamanan tampilan; keamanan data yang sebenarnya ditegakkan RLS di database.
 export default function App() {
   return (
+    <Suspense fallback={<LayarMemuat />}>
     <Routes>
       <Route path="/" element={<ArahkanAwal />} />
       <Route path="/login" element={<HanyaTamu><Login /></HanyaTamu>} />
@@ -56,5 +60,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   )
 }

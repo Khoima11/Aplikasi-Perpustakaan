@@ -424,6 +424,13 @@ begin
     r := pg_temp.sebagai(u_petugas, $q$delete from public.kategori where nama_kategori = 'UJI Kategori'$q$);
     h := h || pg_temp.cek('RLS', 'Petugas menghapus kategori yang masih punya buku -> ditolak', r like 'DITOLAK:%', r);
 
+    r := pg_temp.sebagai(u_petugas, $q$select pinjaman_aktif || ' aktif, ' || pinjaman_terlambat || ' terlambat' from public.v_anggota where nomor_induk = 'UJI-G1'$q$);
+    h := h || pg_temp.cek('RLS', 'View daftar anggota menghitung pinjaman aktif per anggota (guru uji: 2 aktif)', r = 'OK:2 aktif, 0 terlambat', r);
+    r := pg_temp.sebagai(u_s2, $q$select count(*) from public.v_anggota$q$);
+    h := h || pg_temp.cek('RLS', 'Anggota membuka daftar anggota -> hanya melihat dirinya sendiri', r = 'OK:1', r);
+    r := pg_temp.sebagai(null, $q$select count(*) from public.v_anggota$q$);
+    h := h || pg_temp.cek('RLS', 'Tanpa login membuka daftar anggota -> ditolak', r like 'DITOLAK:%', r);
+
     r := pg_temp.sebagai(u_petugas, $q$select count(*) from public.v_keterlambatan$q$);
     h := h || pg_temp.cek('RLS', 'Petugas bisa membuka daftar keterlambatan', r like 'OK:%', r);
 

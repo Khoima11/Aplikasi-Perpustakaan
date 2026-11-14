@@ -48,7 +48,7 @@ Nilai awal `aturan_peminjaman` (bisa diubah petugas di menu Pengaturan):
 - Backend: Supabase (PostgreSQL, Auth, RLS, fungsi database/RPC, Edge Functions, Storage untuk sampul).
 - Hosting: Vercel (Hobby).
 - Zona waktu: **Asia/Jakarta (WIB)** untuk semua perhitungan tanggal, di database maupun frontend.
-- Impor Excel: library `xlsx` (SheetJS) di frontend untuk membaca file, lalu dikirim ke Edge Function.
+- Impor Excel: `read-excel-file` (membaca .xlsx) dan `write-excel-file` (template) di frontend, dimuat saat dibutuhkan, lalu data dikirim ke Edge Function. (Bukan `xlsx`/SheetJS: versi di npm punya celah keamanan yang belum ditambal.)
 - Cetak/PDF: halaman ramah cetak + `window.print()` (pengguna memilih "Simpan sebagai PDF"). Tanpa library PDF.
 
 ## 4. Keputusan teknis
@@ -99,18 +99,18 @@ pembayaran denda online, barcode scanner/RFID, integrasi perpustakaan lain, akun
 docs/                       dokumen kebutuhan (acuan utama)
 public/                     ikon PWA
 src/
-  lib/                      supabase client, helper tanggal WIB, format rupiah
+  lib/                      supabase client, tanggal WIB, format rupiah, galat (terjemahan error DB), cari (filter aman), sampul, akun (Edge Function), imporAnggota (format kolom Excel)
   auth/                     KonteksAuth (sesi+profil, masuk/keluar), Penjaga (WajibLogin, HanyaTamu, ArahkanAwal)
   layouts/                  LayoutPetugas (sidebar), LayoutAnggota (navigasi bawah)
-  components/               komponen UI bersama
+  components/               komponen UI bersama (`ui.tsx`: kelas tombol/input, Lencana, Modal, Konfirmasi, Pemberitahuan, Paginasi)
   pages/petugas/            halaman petugas
   pages/anggota/            halaman anggota
   pages/                    Login, GantiKataSandi
 supabase/
-  migrations/               SQL berurutan: 01 enum+tabel, 02 fungsi bantu+trigger, 03 view, 04 RLS, 05 fungsi sirkulasi, 06 denda+blokir login
+  migrations/               SQL berurutan: 01 enum+tabel, 02 fungsi bantu+trigger, 03 view, 04 RLS, 05 fungsi sirkulasi, 06 denda+blokir login, 07 view anggota+bucket sampul
   pasang_struktur_database.sql   GABUNGAN semua migrasi (dibuat `npm run gabung-sql`, jangan diedit langsung)
   seed.sql                  data contoh (bukan data siswa asli)
-  tests/uji_aturan_bisnis.sql    74 uji AB-01..AB-10 + RLS; aman dijalankan kapan saja (membatalkan perubahannya)
+  tests/uji_aturan_bisnis.sql    77 uji AB-01..AB-10 + RLS; aman dijalankan kapan saja (membatalkan perubahannya)
   tests/00_tiruan_supabase_lokal.sql  HANYA untuk uji di PostgreSQL biasa, jangan dijalankan di Supabase
   functions/kelola-akun/index.ts  Edge Function manajemen akun (satu file, bisa ditempel di editor dashboard)
   config.toml               verify_jwt = false untuk kelola-akun (fungsi memeriksa sendiri)
@@ -154,3 +154,12 @@ PANDUAN_SUPABASE.md         langkah memasang/memperbarui database, Edge Function
   - Catatan Tahap 4: impor Excel harus membaca sel nomor induk sebagai TEKS (NIP 18 digit rusak bila dibaca sebagai angka).
   - Tugas manual pemilik yang tertunda: jalankan migrasi 06, matikan "Allow new users to sign up", deploy Edge Function (lihat PANDUAN_SUPABASE.md bagian 2–4).
   - GitHub: pemilik push sendiri ke `main` dari ZIP; push dari sesi cloud masih 403. Hasil tiap tahap dikirim sebagai ZIP.
+- Tahap 4 (data master), 14/11/2026:
+  - Pemilik sudah menyelesaikan tugas manual Tahap 3 (diverifikasi dari luar): migrasi 06 aktif, pendaftaran mandiri mati, Edge Function `kelola-akun` terpasang dan menolak non-petugas. Sandi `PTG001` sudah diganti pemilik (tidak diketahui sesi ini).
+  - Migrasi 07: view `v_anggota` (anggota + nama + pinjaman_aktif + pinjaman_terlambat, `security_invoker`) dan bucket Storage `sampul` (publik untuk dibaca, tulis/hapus hanya petugas, maks 1 MB, jpeg/png/webp).
+  - `buku.sampul` menyimpan LOKASI file di bucket (`buku-<id>/<waktu>.jpg`), bukan URL. Tampilkan lewat `urlSampul()`. Gambar dikecilkan di browser (maks 480x720, JPEG) sebelum diunggah.
+  - Halaman: Data Kategori, Data Buku (cari judul/pengarang/ISBN, saring kategori, 20 per halaman), Detail Buku & Eksemplar (rute `/petugas/buku/:id`, `baru` untuk tambah), Data Anggota (tab, cari, saring kelas, tambah/edit/reset sandi/nonaktifkan/aktifkan, impor Excel), Pengaturan Aturan.
+  - Edit anggota: nama → `profil_pengguna.nama`, data lain → `anggota` (langsung, dibatasi RLS + izin kolom); perubahan NIS/NIP → Edge Function `ubah_nomor_induk`. Tambah, reset, ubah status → Edge Function.
+  - Format impor Excel hanya diatur di `src/lib/imporAnggota.ts` (`KOLOM_IMPOR`). Template berisi baris judul saja (tanpa baris contoh, karena anggota yang terlanjur dibuat tidak bisa dihapus). Baris diperiksa di browser, yang sah dikirim 25 baris per permintaan; server tetap memeriksa ulang.
+  - Halaman dimuat malas (`React.lazy`) per rute; `Suspense` ada di dalam layout agar sidebar/navigasi tidak berkedip.
+  - Pengujian: kueri baca dijalankan sungguhan ke project pemilik (sebagai anggota contoh, lewat RLS katalog); semua permintaan tulis dicegat di browser uji (54 uji, tidak ada yang sampai ke server). **Belum diuji sungguhan:** tulis data master sebagai petugas, Edge Function dengan sesi petugas, unggah sampul ke Storage, `v_anggota` di project pemilik (migrasi 07 belum dijalankan pemilik). Mengunduh PostgREST untuk tiruan lokal ditolak sistem izin; jangan dicoba lagi tanpa persetujuan pemilik.

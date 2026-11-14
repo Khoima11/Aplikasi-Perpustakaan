@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import Ikon, { type NamaIkon } from '../components/Ikon'
 import Logo from '../components/Logo'
@@ -20,7 +21,9 @@ export default function LayoutAnggota() {
       </header>
 
       <main className="flex-1 px-4 pt-4 pb-24">
-        <Outlet />
+        <Suspense fallback={<p className="text-sm text-slate-500">Memuat...</p>}>
+            <Outlet />
+          </Suspense>
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto grid max-w-lg grid-cols-4 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)]">
