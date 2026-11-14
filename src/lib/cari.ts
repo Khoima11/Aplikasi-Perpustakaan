@@ -16,3 +16,8 @@ export function atauMengandung(kolom: string[], kata: string): string {
   const kutip = `"${pola.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
   return kolom.map((k) => `${k}.ilike.${kutip}`).join(',')
 }
+
+/** Pola "sama persis tanpa membedakan huruf besar/kecil" untuk .ilike() */
+export function polaPersis(kata: string): string {
+  return kata.trim().replace(/[\\%_]/g, '\\$&')
+}

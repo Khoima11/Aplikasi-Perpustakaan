@@ -71,6 +71,7 @@ SQL Editor → New query → tempel isi file → Run. Berhasil jika muncul `Succ
 | `...000001` s.d. `...000005` | Struktur awal (Tahap 2) | Ya |
 | `...000006_denda_dan_blokir_login.sql` | Denda Rp1.000/hari, tandai denda lunas, akun nonaktif diblokir login | Ya (untuk pemasangan baru) |
 | `...000007_view_anggota_dan_sampul.sql` | Daftar anggota untuk halaman Data Anggota, tempat penyimpanan gambar sampul | Ya (untuk pemasangan baru) |
+| `...000008_nama_petugas_di_pinjaman.sql` | Nama petugas pencatat pada bukti peminjaman dan daftar transaksi | Ya (untuk pemasangan baru) |
 
 Jika database Anda dipasang **sebelum** sebuah migrasi ada, jalankan file migrasi itu secara terpisah.
 Setelah itu jalankan lagi skrip uji (Bagian 1-D) untuk memastikan semuanya tetap lulus.

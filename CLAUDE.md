@@ -99,7 +99,7 @@ pembayaran denda online, barcode scanner/RFID, integrasi perpustakaan lain, akun
 docs/                       dokumen kebutuhan (acuan utama)
 public/                     ikon PWA
 src/
-  lib/                      supabase client, tanggal WIB, format rupiah, galat (terjemahan error DB), cari (filter aman), sampul, akun (Edge Function), imporAnggota (format kolom Excel)
+  lib/                      supabase client, tanggal WIB, format rupiah, galat (terjemahan error DB), cari (filter aman), sampul, akun (Edge Function), imporAnggota (format kolom Excel), sirkulasi (pemanggil fungsi transaksi)
   auth/                     KonteksAuth (sesi+profil, masuk/keluar), Penjaga (WajibLogin, HanyaTamu, ArahkanAwal)
   layouts/                  LayoutPetugas (sidebar), LayoutAnggota (navigasi bawah)
   components/               komponen UI bersama (`ui.tsx`: kelas tombol/input, Lencana, Modal, Konfirmasi, Pemberitahuan, Paginasi)
@@ -107,15 +107,16 @@ src/
   pages/anggota/            halaman anggota
   pages/                    Login, GantiKataSandi
 supabase/
-  migrations/               SQL berurutan: 01 enum+tabel, 02 fungsi bantu+trigger, 03 view, 04 RLS, 05 fungsi sirkulasi, 06 denda+blokir login, 07 view anggota+bucket sampul
+  migrations/               SQL berurutan: 01 enum+tabel, 02 fungsi bantu+trigger, 03 view, 04 RLS, 05 fungsi sirkulasi, 06 denda+blokir login, 07 view anggota+bucket sampul, 08 nama petugas di v_pinjaman
   pasang_struktur_database.sql   GABUNGAN semua migrasi (dibuat `npm run gabung-sql`, jangan diedit langsung)
   seed.sql                  data contoh (bukan data siswa asli)
-  tests/uji_aturan_bisnis.sql    77 uji AB-01..AB-10 + RLS; aman dijalankan kapan saja (membatalkan perubahannya)
+  tests/uji_aturan_bisnis.sql    79 uji AB-01..AB-10 + RLS; aman dijalankan kapan saja (membatalkan perubahannya)
   tests/00_tiruan_supabase_lokal.sql  HANYA untuk uji di PostgreSQL biasa, jangan dijalankan di Supabase
   functions/kelola-akun/index.ts  Edge Function manajemen akun (satu file, bisa ditempel di editor dashboard)
   config.toml               verify_jwt = false untuk kelola-akun (fungsi memeriksa sendiri)
   buat_petugas_pertama.sql  membuat akun petugas tanpa seed
 scripts/gabung-sql.mjs      pembuat file gabungan migrasi
+scripts/uji-lokal/          alat uji pengembang: halaman dijalankan di browser, data dijawab PostgreSQL lokal (lihat BACA.md)
 PANDUAN_SUPABASE.md         langkah memasang/memperbarui database, Edge Function, dan .env (bahasa sederhana)
 ```
 
@@ -163,3 +164,12 @@ PANDUAN_SUPABASE.md         langkah memasang/memperbarui database, Edge Function
   - Format impor Excel hanya diatur di `src/lib/imporAnggota.ts` (`KOLOM_IMPOR`). Template berisi baris judul saja (tanpa baris contoh, karena anggota yang terlanjur dibuat tidak bisa dihapus). Baris diperiksa di browser, yang sah dikirim 25 baris per permintaan; server tetap memeriksa ulang.
   - Halaman dimuat malas (`React.lazy`) per rute; `Suspense` ada di dalam layout agar sidebar/navigasi tidak berkedip.
   - Pengujian: kueri baca dijalankan sungguhan ke project pemilik (sebagai anggota contoh, lewat RLS katalog); semua permintaan tulis dicegat di browser uji (54 uji, tidak ada yang sampai ke server). **Belum diuji sungguhan:** tulis data master sebagai petugas, Edge Function dengan sesi petugas, unggah sampul ke Storage, `v_anggota` di project pemilik (migrasi 07 belum dijalankan pemilik). Mengunduh PostgREST untuk tiruan lokal ditolak sistem izin; jangan dicoba lagi tanpa persetujuan pemilik.
+- Tahap 5 (sirkulasi), 14/11/2026:
+  - Uji coba pemilik di Tahap 4 terbukti berhasil di Supabase sungguhan (terlihat dari data): kategori baru, buku baru dengan sampul di Storage, dan eksemplar tersimpan. Migrasi 07 aktif.
+  - Migrasi 08: `v_pinjaman` ditambah kolom `nama_petugas` dan `nama_petugas_kembali` (kosong bagi anggota karena RLS profil).
+  - Halaman: Peminjaman (cek kelayakan → daftar buku → simpan → bukti), Bukti Peminjaman (`/petugas/peminjaman/bukti/:id`, cetak/PDF lewat `window.print()`), Pengembalian & Perpanjangan (+ daftar "Denda Belum Lunas" dengan tombol Tandai Lunas), Daftar Keterlambatan (detail → tautan ke Pengembalian `?no=<nomor induk>`).
+  - Nomor transaksi tampil sebagai `PJ-` + id 6 digit (`nomorTransaksi()`), tidak disimpan terpisah.
+  - Tampilan hanya melakukan pemeriksaan awal (duplikat, batas pinjam, status eksemplar) agar petugas cepat tahu; keputusan akhir selalu oleh fungsi database, dan pesan penolakannya ditampilkan apa adanya.
+  - Kondisi kembali Rusak/Hilang selalu meminta konfirmasi petugas (AB-08). Kolom nomor induk berfokus otomatis dan menerima Enter (siap untuk scanner keyboard).
+  - Alat uji baru `scripts/uji-lokal/`: 50 uji alur sirkulasi dijalankan di browser dengan data dari PostgreSQL lokal (fungsi dan RLS sungguhan). Uji Tahap 4 yang lama membaca data pemilik dan mengandaikan jumlah seed, jadi tidak lagi cocok setelah pemilik menambah data (bukan regresi).
+  - **Belum diuji di Supabase pemilik:** halaman sirkulasi dengan sesi petugas sungguhan (menunggu migrasi 08 dan uji coba pemilik).

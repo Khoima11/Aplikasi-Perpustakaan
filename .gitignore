@@ -9,3 +9,6 @@ dev-dist
 supabase/.temp
 supabase/.branches
 *.tsbuildinfo
+
+# keluaran alat uji lokal
+scripts/uji-lokal/keluaran/

@@ -27,7 +27,8 @@ export function pesanGalat(galat: unknown, pengganti: Pengganti = {}): string {
     case '22001':
       return 'Ada isian yang terlalu panjang.'
     case '42501':
-      return 'Anda tidak memiliki izin untuk melakukan tindakan ini.'
+      // pesan dari fungsi sirkulasi ("Hanya petugas yang dapat ...") sudah jelas
+      return /^Hanya petugas/.test(pesan) ? pesan : 'Anda tidak memiliki izin untuk melakukan tindakan ini.'
     case 'P0001': // pesan dari "raise exception" di fungsi/trigger kita, sudah berbahasa Indonesia
       return pesan
     case 'PGRST116':

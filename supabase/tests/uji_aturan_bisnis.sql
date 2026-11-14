@@ -431,6 +431,11 @@ begin
     r := pg_temp.sebagai(null, $q$select count(*) from public.v_anggota$q$);
     h := h || pg_temp.cek('RLS', 'Tanpa login membuka daftar anggota -> ditolak', r like 'DITOLAK:%', r);
 
+    r := pg_temp.sebagai(u_petugas, $q$select string_agg(distinct nama_petugas, ',') from public.v_pinjaman where nomor_induk_anggota = 'UJI-S2'$q$);
+    h := h || pg_temp.cek('RLS', 'Petugas melihat nama petugas pencatat pada data pinjaman', r = 'OK:UJI Petugas', r);
+    r := pg_temp.sebagai(u_s2, $q$select count(*) || ' pinjaman, nama petugas terlihat: ' || count(nama_petugas) from public.v_pinjaman$q$);
+    h := h || pg_temp.cek('RLS', 'Anggota tetap melihat pinjamannya, tetapi tidak bisa membaca profil petugas', r = 'OK:3 pinjaman, nama petugas terlihat: 0', r);
+
     r := pg_temp.sebagai(u_petugas, $q$select count(*) from public.v_keterlambatan$q$);
     h := h || pg_temp.cek('RLS', 'Petugas bisa membuka daftar keterlambatan', r like 'OK:%', r);
 
