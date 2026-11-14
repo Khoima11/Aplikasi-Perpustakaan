@@ -102,7 +102,7 @@ src/
   lib/                      supabase client, tanggal WIB, format rupiah, galat (terjemahan error DB), cari (filter aman), sampul, akun (Edge Function), imporAnggota (format kolom Excel), sirkulasi (pemanggil fungsi transaksi)
   auth/                     KonteksAuth (sesi+profil, masuk/keluar), Penjaga (WajibLogin, HanyaTamu, ArahkanAwal)
   layouts/                  LayoutPetugas (sidebar), LayoutAnggota (navigasi bawah)
-  components/               komponen UI bersama (`ui.tsx`: kelas tombol/input, Lencana, Modal, Konfirmasi, Pemberitahuan, Paginasi)
+  components/               komponen UI bersama (`ui.tsx`: kelas tombol/input, Lencana, Modal, Konfirmasi, Pemberitahuan, Paginasi; `anggota.tsx`: SampulBuku, kartu pinjaman, penanda jatuh tempo/ketersediaan)
   pages/petugas/            halaman petugas
   pages/anggota/            halaman anggota
   pages/                    Login, GantiKataSandi
@@ -173,3 +173,12 @@ PANDUAN_SUPABASE.md         langkah memasang/memperbarui database, Edge Function
   - Kondisi kembali Rusak/Hilang selalu meminta konfirmasi petugas (AB-08). Kolom nomor induk berfokus otomatis dan menerima Enter (siap untuk scanner keyboard).
   - Alat uji baru `scripts/uji-lokal/`: 50 uji alur sirkulasi dijalankan di browser dengan data dari PostgreSQL lokal (fungsi dan RLS sungguhan). Uji Tahap 4 yang lama membaca data pemilik dan mengandaikan jumlah seed, jadi tidak lagi cocok setelah pemilik menambah data (bukan regresi).
   - **Belum diuji di Supabase pemilik:** halaman sirkulasi dengan sesi petugas sungguhan (menunggu migrasi 08 dan uji coba pemilik).
+  - **Keputusan ditunda pemilik (15/11/2026):** perpanjangan di hari yang sama dengan hari pinjam menghasilkan jatuh tempo yang sama tetapi memakai jatah perpanjangan (sesuai AB-05: tanggal perpanjangan + lama pinjam). Dua pilihan yang sudah ditawarkan: (A) aturan tetap, tolak perpanjangan yang tidak menambah jatuh tempo; (B) ubah menjadi jatuh tempo lama + lama pinjam (mengubah AB-05, perlu persetujuan sekolah). Pemilik memilih "nanti saja" → JANGAN diubah sebelum pemilik memutuskan; tanyakan lagi di Tahap 8.
+- Tahap 6 (halaman anggota), 15/11/2026:
+  - Migrasi 08 sudah aktif di project pemilik (kolom `nama_petugas` terbaca). Tidak ada migrasi baru di tahap ini.
+  - Halaman: Beranda (sapaan, cari → katalog, kotak Peringatan, pinjaman aktif, 6 buku baru), Katalog (cari otomatis 0,4 detik setelah mengetik, chip kategori, 20 per muat + "Muat lebih banyak", keadaan disimpan di alamat `?cari=&kategori=`), Detail Buku (tanpa tombol pinjam; keterangan "peminjaman di meja petugas"), Pinjaman Saya (tab Aktif/Riwayat). Profil sudah ada sejak Tahap 3.
+  - Peringatan muncul untuk pinjaman terlambat dan yang jatuh tempo dalam `HARI_PERINGATAN_JATUH_TEMPO` (2) hari, dikelompokkan seperti wireframe ("N buku jatuh tempo pada ...", "N buku terlambat X hari").
+  - Penanda ketersediaan: hijau "Tersedia x/y", oranye "Semua dipinjam", biru "Baca di tempat", abu "Tidak tersedia/Belum ada eksemplar".
+  - Riwayat juga menampilkan keterlambatan dan denda milik anggota itu (lunas/belum lunas) — hanya informasi, tanpa aksi.
+  - Halaman anggota tidak mengirim permintaan tulis apa pun (terbukti di uji: hanya `catat_login`).
+  - Pengujian: `scripts/uji-lokal/uji-anggota.cjs` — 71 uji browser (iPhone 13) LANGSUNG ke project pemilik dengan 5 akun contoh; nilai harapan diambil dari API dengan token yang sama. Termasuk gambar sampul dari Storage, RLS (hanya pinjaman sendiri), ukuran sentuh >= 44px, tanpa gulir samping.

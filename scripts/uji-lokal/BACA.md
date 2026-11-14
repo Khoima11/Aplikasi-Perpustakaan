@@ -13,6 +13,7 @@ RLS, dan pesan penolakannya sungguhan.
 | `siapkan-db.sh` | Membuat ulang database `simpus_uji` (tiruan Supabase + migrasi + seed) |
 | `db-lokal.cjs` | Penjawab permintaan REST dari database lokal |
 | `uji-sirkulasi.cjs` | 50 uji: keterlambatan, peminjaman, bukti, pengembalian, perpanjangan, denda |
+| `uji-anggota.cjs` | 71 uji halaman anggota; hanya membaca, langsung ke Supabase di `.env` (tidak butuh database lokal) |
 
 Menjalankan (database lokal harus disegarkan dulu karena uji mengubah datanya):
 
