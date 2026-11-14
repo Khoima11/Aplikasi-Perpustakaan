@@ -19,16 +19,19 @@ import Katalog from './pages/anggota/Katalog'
 import DetailBukuAnggota from './pages/anggota/DetailBukuAnggota'
 import PinjamanSaya from './pages/anggota/PinjamanSaya'
 import Profil from './pages/anggota/Profil'
+import UbahKataSandi from './pages/petugas/UbahKataSandi'
+import { ArahkanAwal, HanyaTamu, WajibLogin } from './auth/Penjaga'
 
-// Penjagaan halaman berdasarkan peran (petugas/anggota) ditambahkan pada Tahap 3.
+// Setiap kelompok halaman dijaga sesuai peran. Penjagaan di sini hanya untuk
+// kenyamanan tampilan; keamanan data yang sebenarnya ditegakkan RLS di database.
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<ArahkanAwal />} />
+      <Route path="/login" element={<HanyaTamu><Login /></HanyaTamu>} />
       <Route path="/ganti-kata-sandi" element={<GantiKataSandi />} />
 
-      <Route path="/petugas" element={<LayoutPetugas />}>
+      <Route path="/petugas" element={<WajibLogin peran="petugas"><LayoutPetugas /></WajibLogin>}>
         <Route index element={<Dashboard />} />
         <Route path="kategori" element={<DataKategori />} />
         <Route path="buku" element={<DataBuku />} />
@@ -40,9 +43,10 @@ export default function App() {
         <Route path="keterlambatan" element={<Keterlambatan />} />
         <Route path="laporan" element={<Laporan />} />
         <Route path="pengaturan" element={<Pengaturan />} />
+        <Route path="ubah-kata-sandi" element={<UbahKataSandi />} />
       </Route>
 
-      <Route path="/anggota" element={<LayoutAnggota />}>
+      <Route path="/anggota" element={<WajibLogin peran="anggota"><LayoutAnggota /></WajibLogin>}>
         <Route index element={<Beranda />} />
         <Route path="katalog" element={<Katalog />} />
         <Route path="buku/:id" element={<DetailBukuAnggota />} />
@@ -50,7 +54,7 @@ export default function App() {
         <Route path="profil" element={<Profil />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

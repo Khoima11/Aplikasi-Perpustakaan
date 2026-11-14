@@ -1,16 +1,30 @@
 import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../auth/KonteksAuth'
 import Logo from '../components/Logo'
 import PeringatanKonfigurasi from '../components/PeringatanKonfigurasi'
+import { berandaUntuk } from '../lib/tipe'
 
-// Tampilan login sesuai wireframe. Proses login sebenarnya dihubungkan pada Tahap 3.
 export default function Login() {
+  const { masuk } = useAuth()
+  const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [kataSandi, setKataSandi] = useState('')
   const [pesan, setPesan] = useState('')
+  const [sibuk, setSibuk] = useState(false)
 
-  function masuk(e: FormEvent) {
+  async function kirim(e: FormEvent) {
     e.preventDefault()
-    setPesan('Fitur login akan aktif pada Tahap 3.')
+    setPesan('')
+    setSibuk(true)
+    const hasil = await masuk(username, kataSandi)
+    setSibuk(false)
+    if (!hasil.ok) {
+      setPesan(hasil.pesan)
+      return
+    }
+    // Peran ditentukan otomatis dari akun, bukan dipilih pengguna
+    navigate(hasil.profil.wajib_ganti_password ? '/ganti-kata-sandi' : berandaUntuk(hasil.profil.role), { replace: true })
   }
 
   function reset() {
@@ -23,7 +37,7 @@ export default function Login() {
     <div className="flex min-h-screen flex-col bg-slate-100">
       <PeringatanKonfigurasi />
       <div className="flex flex-1 items-center justify-center p-4">
-        <form onSubmit={masuk} className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <form onSubmit={kirim} className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="flex flex-col items-center text-center">
             <Logo className="h-16 w-16" />
             <h1 className="mt-3 text-2xl font-bold text-utama-700">SIMPUS</h1>
@@ -39,6 +53,8 @@ export default function Login() {
             onChange={(e) => setUsername(e.target.value)}
             autoComplete="username"
             autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             className="mt-1 h-12 w-full rounded-lg border border-slate-300 px-3 outline-none focus:border-utama-600 focus:ring-2 focus:ring-utama-100"
             required
           />
@@ -54,11 +70,17 @@ export default function Login() {
             required
           />
 
-          {pesan && <p className="mt-3 rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-800">{pesan}</p>}
+          {pesan && (
+            <p role="alert" className="mt-3 rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-800">{pesan}</p>
+          )}
 
           <div className="mt-5 flex gap-2">
-            <button type="submit" className="h-12 flex-1 rounded-lg bg-utama-700 font-semibold text-white hover:bg-utama-800">
-              Masuk
+            <button
+              type="submit"
+              disabled={sibuk}
+              className="h-12 flex-1 rounded-lg bg-utama-700 font-semibold text-white hover:bg-utama-800 disabled:opacity-60"
+            >
+              {sibuk ? 'Memeriksa...' : 'Masuk'}
             </button>
             <button type="button" onClick={reset} className="h-12 rounded-lg border border-slate-300 px-4 hover:bg-slate-50">
               Reset

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useAuth } from '../auth/KonteksAuth'
 import Ikon, { type NamaIkon } from '../components/Ikon'
 import Logo from '../components/Logo'
 import PeringatanKonfigurasi from '../components/PeringatanKonfigurasi'
@@ -18,9 +19,8 @@ const menu: { ke: string; label: string; ikon: NamaIkon; persis?: boolean }[] = 
 
 export default function LayoutPetugas() {
   const [menuTerbuka, setMenuTerbuka] = useState(false)
-  const navigate = useNavigate()
-  // Nama petugas & logout yang sebenarnya dihubungkan pada Tahap 3
-  const namaPengguna = 'Petugas'
+  const [menuAkun, setMenuAkun] = useState(false)
+  const { profil, keluar } = useAuth()
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -35,13 +35,40 @@ export default function LayoutPetugas() {
         </button>
         <Logo />
         <span className="text-xl font-bold text-utama-700">SIMPUS</span>
-        <div className="ml-auto flex items-center gap-3">
-          <span className="hidden text-sm text-slate-600 sm:inline">{namaPengguna}</span>
+        <div className="relative ml-auto flex items-center gap-2">
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => setMenuAkun(!menuAkun)}
+            aria-expanded={menuAkun}
+            className="flex min-h-11 max-w-[11rem] items-center gap-2 rounded-lg px-2 text-sm text-slate-700 hover:bg-slate-100 sm:max-w-xs"
+          >
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-utama-100 text-utama-700">
+              <Ikon nama="profil" className="h-4 w-4" />
+            </span>
+            <span className="truncate">{profil?.nama}</span>
+            <span aria-hidden="true">▾</span>
+          </button>
+          {menuAkun && (
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setMenuAkun(false)} />
+              <div className="absolute right-0 top-12 z-40 w-52 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                <p className="border-b border-slate-100 px-3 py-2 text-xs text-slate-500">
+                  Login sebagai {profil?.username}
+                </p>
+                <Link
+                  to="/petugas/ubah-kata-sandi"
+                  onClick={() => setMenuAkun(false)}
+                  className="flex min-h-11 items-center px-3 text-sm hover:bg-slate-50"
+                >
+                  Ubah Kata Sandi
+                </Link>
+              </div>
+            </>
+          )}
+          <button
+            onClick={() => void keluar()}
             className="flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 px-3 text-sm hover:bg-slate-50"
           >
-            <Ikon nama="keluar" /> Logout
+            <Ikon nama="keluar" /> <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </header>

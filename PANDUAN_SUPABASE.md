@@ -1,70 +1,161 @@
-# Panduan Memasang Database SIMPUS di Supabase
+# Panduan Memasang SIMPUS di Supabase
 
-Panduan ini untuk pemilik project. Tidak perlu memasang aplikasi apa pun, cukup browser.
-Waktu yang dibutuhkan sekitar 15 menit.
+Panduan ini untuk pemilik project. Hampir semuanya cukup lewat browser.
+Nama tombol di Supabase kadang berubah sedikit; cari yang paling mirip.
 
-## A. Membuat project Supabase (gratis)
+Daftar isi:
+- Bagian 1 — Memasang database dari nol (project Supabase baru)
+- Bagian 2 — Memperbarui database yang sudah terpasang
+- Bagian 3 — Mematikan pendaftaran mandiri
+- Bagian 4 — Memasang Edge Function `kelola-akun`
+- Bagian 5 — Menghubungkan aplikasi (file `.env`) dan menjalankannya di komputer
+
+---
+
+## Bagian 1 — Memasang database dari nol
+
+### A. Membuat project Supabase (gratis)
 
 1. Buka https://supabase.com lalu klik **Start your project**. Daftar memakai akun Google atau GitHub.
 2. Klik **New project**.
 3. Isi:
    - **Name**: `simpus`
-   - **Database Password**: klik **Generate a password**, lalu **salin dan simpan** di tempat aman
-     (catatan pribadi). Kata sandi ini jarang dipakai, tetapi tidak bisa dilihat lagi nanti.
-   - **Region**: pilih **Southeast Asia (Singapore)** agar cepat diakses dari Indonesia.
-4. Klik **Create new project** dan tunggu 1–2 menit sampai selesai disiapkan.
+   - **Database Password**: klik **Generate a password**, lalu **salin dan simpan** di tempat aman.
+   - **Region**: **Southeast Asia (Singapore)**.
+4. Klik **Create new project** dan tunggu 1–2 menit.
 
-## B. Memasang struktur database
+### B. Memasang struktur database
 
-1. Di menu kiri Supabase, klik **SQL Editor**, lalu **New query** (atau tanda **+**).
-2. Buka file `supabase/pasang_struktur_database.sql` dari project ini, salin **seluruh** isinya
-   (Ctrl+A lalu Ctrl+C), tempel ke SQL Editor (Ctrl+V).
-3. Klik **Run** (atau Ctrl+Enter).
-   - Jika muncul peringatan seperti *"Potential issue detected"* / *"destructive operation"*,
-     itu wajar karena skrip mengatur hak akses. Klik **Run this query**.
-4. Berhasil jika di bagian bawah muncul tulisan: `Struktur database SIMPUS berhasil dipasang`.
+1. Di menu kiri klik **SQL Editor**, lalu **New query**.
+2. Salin **seluruh** isi file `supabase/pasang_struktur_database.sql`, tempel, lalu klik **Run**.
+   - Jika muncul peringatan *"Potential issue detected"* / *"destructive operation"*, klik **Run this query**.
+3. Berhasil jika muncul: `Struktur database SIMPUS berhasil dipasang`.
 
-## C. Mengisi data contoh
+File ini hanya untuk project yang masih kosong. Jangan dijalankan dua kali.
 
-1. Klik **New query** lagi (lembar kosong baru).
-2. Salin seluruh isi file `supabase/seed.sql`, tempel, lalu **Run**.
-3. Berhasil jika muncul satu baris angka:
-   `petugas 1, anggota 10, kategori 6, buku 30, eksemplar 60, pinjaman_aktif 12, pinjaman_terlambat 3`.
+### C. Mengisi data awal (pilih salah satu)
 
-Data contoh ini karangan (bukan data siswa asli). Akun contohnya:
+- **Uji coba:** jalankan `supabase/seed.sql` (data contoh karangan: 1 petugas, 10 anggota, 30 buku).
+  Berhasil jika muncul: petugas 1, anggota 10, kategori 6, buku 30, eksemplar 60, pinjaman_aktif 12, pinjaman_terlambat 3.
+- **Pemakaian sungguhan (tanpa data contoh):** buka `supabase/buat_petugas_pertama.sql`,
+  ganti ID dan nama petugas di bagian atas, lalu jalankan. Data lain diisi lewat aplikasi.
 
-| Peran | Username | Kata sandi awal |
+Akun contoh dari `seed.sql` (kata sandi awal = username, wajib diganti saat login pertama):
+
+| Peran | Username |
+|---|---|
+| Petugas | `PTG001` |
+| Siswa | `240001`, `240002`, `240003`, `230004`, `230005`, `220006` |
+| Siswa nonaktif (tidak bisa login) | `220007` |
+| Guru | `198501012010011001`, `199003152015032002`, `197811202005011003` |
+
+### D. Menjalankan uji aturan bisnis
+
+1. **New query** baru, tempel seluruh isi `supabase/tests/uji_aturan_bisnis.sql`, lalu **Run**.
+2. Jika muncul peringatan RLS untuk tabel `hasil_uji`, pilih **Run without RLS**
+   (itu hanya tabel sementara penampung hasil uji).
+3. Baris paling bawah (**RINGKASAN**) seharusnya `... LULUS, 0 GAGAL` dan `LULUS SEMUA`.
+
+Uji ini aman dijalankan kapan saja; ia membatalkan sendiri semua perubahannya.
+
+---
+
+## Bagian 2 — Memperbarui database yang sudah terpasang
+
+Setiap perubahan struktur database datang sebagai file baru di `supabase/migrations/`.
+Jalankan **hanya file yang belum pernah dijalankan**, urut dari nomor terkecil:
+SQL Editor → New query → tempel isi file → Run. Berhasil jika muncul `Success. No rows returned`.
+
+| File migrasi | Isi | Sudah termasuk di `pasang_struktur_database.sql`? |
 |---|---|---|
-| Petugas | `PTG001` | `PTG001` |
-| Siswa | `240001`, `240002`, `240003`, `230004`, `230005`, `220006` | sama dengan username |
-| Siswa nonaktif | `220007` | (tidak bisa login) |
-| Guru | `198501012010011001`, `199003152015032002`, `197811202005011003` | sama dengan username |
+| `...000001` s.d. `...000005` | Struktur awal (Tahap 2) | Ya |
+| `...000006_denda_dan_blokir_login.sql` | Denda Rp1.000/hari, tandai denda lunas, akun nonaktif diblokir login | Ya (untuk pemasangan baru) |
 
-## D. Menjalankan uji aturan bisnis
+Jika database Anda dipasang **sebelum** sebuah migrasi ada, jalankan file migrasi itu secara terpisah.
+Setelah itu jalankan lagi skrip uji (Bagian 1-D) untuk memastikan semuanya tetap lulus.
 
-1. Klik **New query** lagi.
-2. Salin seluruh isi file `supabase/tests/uji_aturan_bisnis.sql`, tempel, lalu **Run**.
-3. Muncul tabel berisi 68 baris uji. Gulir ke baris paling bawah (**RINGKASAN**).
-   Seharusnya tertulis: `68 uji dijalankan: 68 LULUS, 0 GAGAL` dan `LULUS SEMUA`.
+---
 
-Uji ini aman dijalankan kapan saja: ia membuat data uji sendiri lalu membatalkannya,
-sehingga data Anda tidak berubah.
+## Bagian 3 — Mematikan pendaftaran mandiri
 
-## E. Menyalin alamat dan kunci untuk aplikasi
+SIMPUS tidak mengenal pendaftaran sendiri; akun dibuat petugas. Matikan fitur daftar bawaan Supabase:
 
-1. Di Supabase, klik ikon roda gigi **Project Settings** (kiri bawah).
-2. Buka **Data API** untuk melihat **Project URL**, dan **API Keys** untuk melihat kunci.
-3. Yang dibutuhkan aplikasi hanya dua:
-   - **Project URL** (contoh: `https://abcdefgh.supabase.co`)
-   - kunci **anon / public** (pada tampilan baru bernama **Publishable key**)
-4. **JANGAN** menyalin atau membagikan kunci **service_role** / **Secret key** ke siapa pun,
-   termasuk ke dalam percakapan. Kunci itu bisa membuka seluruh data.
+1. Menu kiri **Authentication** → **Sign In / Providers** (atau **Providers**).
+2. Di bagian **User Signups**, matikan **Allow new users to sign up**.
+3. Klik **Save**.
 
-Kedua nilai di langkah 3 aman dibagikan (memang dirancang untuk dipakai di aplikasi),
-dan akan diisikan ke file `.env` pada Tahap 3.
+Petugas tetap bisa membuat akun anggota dari aplikasi; yang ditutup hanya pendaftaran dari luar.
+
+---
+
+## Bagian 4 — Memasang Edge Function `kelola-akun`
+
+Edge Function ini yang membuat akun anggota, impor Excel, reset kata sandi, dan menonaktifkan anggota.
+Ia berjalan di server Supabase dan memegang kunci rahasia, sehingga kunci itu tidak pernah sampai ke browser.
+
+1. Menu kiri **Edge Functions** → **Deploy a new function** → **Via Editor**.
+2. Isi nama fungsi persis: `kelola-akun`
+3. Hapus semua kode contoh di editor, lalu tempel **seluruh** isi file
+   `supabase/functions/kelola-akun/index.ts`.
+4. Klik **Deploy function**.
+5. Setelah terpasang, buka fungsi `kelola-akun` → tab **Details** (atau **Settings**).
+   Matikan **Verify JWT with legacy secret** (kadang tertulis **Enforce JWT Verification**), lalu **Save**.
+   Ini aman: fungsi memeriksa sendiri bahwa pemanggil sudah login dan berperan petugas.
+
+Tidak ada kunci yang perlu Anda salin atau isi; Supabase menyediakannya otomatis untuk fungsi ini.
+
+Jika kode fungsi berubah di tahap berikutnya, ulangi langkah 3–4 pada fungsi yang sama
+(buka fungsi → tab **Code** → ganti isinya → **Deploy updates**).
+
+---
+
+## Bagian 5 — Menghubungkan aplikasi dan menjalankannya di komputer
+
+### Nilai yang dibutuhkan (dari Supabase → Project Settings)
+
+- **Project URL** — di **Data API** (contoh `https://abcdefgh.supabase.co`)
+- kunci **Publishable** (dulu bernama *anon / public*) — di **API Keys**
+
+**JANGAN** memakai atau membagikan kunci **Secret / service_role**. Kunci itu membuka seluruh data.
+
+### Membuat file `.env`
+
+Di CMD, dari dalam folder project:
+
+```bash
+copy .env.example .env
+```
+
+```bash
+notepad .env
+```
+
+Isi tiga baris ini dengan nilai Anda, lalu simpan (Ctrl+S):
+
+```
+VITE_SUPABASE_URL=https://xxxxxxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_xxxxxxxxxxxx
+VITE_NAMA_SEKOLAH=Nama Sekolah Anda
+```
+
+File `.env` tidak ikut ter-push ke GitHub (sudah diatur di `.gitignore`).
+
+### Menjalankan aplikasi
+
+Perlu Node.js versi LTS (unduh di https://nodejs.org, pasang dengan Next sampai selesai, lalu buka CMD baru).
+
+```bash
+npm install
+```
+
+```bash
+npm run dev
+```
+
+Buka alamat yang muncul (biasanya http://localhost:5173). Untuk berhenti, tekan Ctrl+C di CMD.
+
+---
 
 ## Jika ada yang gagal
 
-Salin pesan error berwarna merah yang muncul di SQL Editor, lalu kirimkan apa adanya.
-Jangan menjalankan ulang `pasang_struktur_database.sql` pada project yang sudah terpasang;
-skrip itu hanya untuk project yang masih kosong.
+Salin pesan error apa adanya (atau screenshot), lalu kirimkan.

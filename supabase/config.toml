@@ -1,0 +1,8 @@
+# Pengaturan Supabase CLI untuk project SIMPUS.
+project_id = "simpus"
+
+# Fungsi kelola-akun memeriksa sendiri sesi login dan peran petugas di dalam kodenya
+# (lihat supabase/functions/kelola-akun/index.ts), jadi pemeriksaan JWT bawaan
+# gerbang dimatikan agar tetap berjalan dengan kunci API model baru.
+[functions.kelola-akun]
+verify_jwt = false

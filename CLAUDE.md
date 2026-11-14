@@ -100,21 +100,23 @@ docs/                       dokumen kebutuhan (acuan utama)
 public/                     ikon PWA
 src/
   lib/                      supabase client, helper tanggal WIB, format rupiah
-  auth/                     konteks sesi, penjaga route per role
+  auth/                     KonteksAuth (sesi+profil, masuk/keluar), Penjaga (WajibLogin, HanyaTamu, ArahkanAwal)
   layouts/                  LayoutPetugas (sidebar), LayoutAnggota (navigasi bawah)
   components/               komponen UI bersama
   pages/petugas/            halaman petugas
   pages/anggota/            halaman anggota
   pages/                    Login, GantiKataSandi
 supabase/
-  migrations/               SQL berurutan: 01 enum+tabel, 02 fungsi bantu+trigger, 03 view, 04 RLS, 05 fungsi sirkulasi
+  migrations/               SQL berurutan: 01 enum+tabel, 02 fungsi bantu+trigger, 03 view, 04 RLS, 05 fungsi sirkulasi, 06 denda+blokir login
   pasang_struktur_database.sql   GABUNGAN semua migrasi (dibuat `npm run gabung-sql`, jangan diedit langsung)
   seed.sql                  data contoh (bukan data siswa asli)
-  tests/uji_aturan_bisnis.sql    68 uji AB-01..AB-10 + RLS; aman dijalankan kapan saja (membatalkan perubahannya)
+  tests/uji_aturan_bisnis.sql    74 uji AB-01..AB-10 + RLS; aman dijalankan kapan saja (membatalkan perubahannya)
   tests/00_tiruan_supabase_lokal.sql  HANYA untuk uji di PostgreSQL biasa, jangan dijalankan di Supabase
-  functions/                Edge Functions manajemen akun
+  functions/kelola-akun/index.ts  Edge Function manajemen akun (satu file, bisa ditempel di editor dashboard)
+  config.toml               verify_jwt = false untuk kelola-akun (fungsi memeriksa sendiri)
+  buat_petugas_pertama.sql  membuat akun petugas tanpa seed
 scripts/gabung-sql.mjs      pembuat file gabungan migrasi
-PANDUAN_SUPABASE.md         langkah memasang database di Supabase (bahasa sederhana)
+PANDUAN_SUPABASE.md         langkah memasang/memperbarui database, Edge Function, dan .env (bahasa sederhana)
 ```
 
 ## 7. Cara kerja
@@ -137,6 +139,18 @@ PANDUAN_SUPABASE.md         langkah memasang database di Supabase (bahasa sederh
   - Nomor induk (anggota & eksemplar) dan username dicocokkan tanpa membedakan huruf besar/kecil (unique index pada `lower(...)`).
   - Hapus anggota dilarang trigger (bahkan untuk service_role). `anggota.status_anggota` → otomatis menyalin ke `profil_pengguna.status` lewat trigger.
   - Izin: migrasi 04 mencabut semua izin bawaan anon/authenticated lalu memberi seperlunya. **Setiap fungsi baru di migrasi berikutnya harus di-`revoke ... from public, anon, authenticated` lalu di-`grant` secara eksplisit** (Supabase memberi izin execute bawaan ke anon).
-  - Migrasi dan uji sudah dijalankan di PostgreSQL 16 lokal dengan tiruan Supabase (68/68 lulus, termasuk uji dua transaksi bersamaan). Belum diuji di project Supabase sungguhan sampai pemilik membuatnya.
+  - Migrasi dan uji sudah dijalankan di PostgreSQL 16 lokal dengan tiruan Supabase (68/68 lulus, termasuk uji dua transaksi bersamaan). Pada 14/11/2026 pemilik memasang struktur + seed di project Supabase sungguhan dan menjalankan skrip uji: 68/68 LULUS. (Di SQL Editor, saat menjalankan skrip uji pilih "Run without RLS" karena peringatan itu hanya untuk tabel sementara `hasil_uji`.)
   - Catatan untuk Tahap 3: Supabase Auth mensyaratkan kata sandi minimal 6 karakter. NIS/NIP yang lebih pendek perlu aturan kata sandi awal khusus (seed memakai NIS 6 digit). Belum ada cara membuat petugas pertama tanpa seed → sediakan skrip SQL khusus.
   - Belum ada (tidak diminta dokumen): cara mengubah `status_denda` dari `belum_lunas` ke `lunas` setelah pengembalian. Tanyakan pemilik bila sekolah menerapkan denda.
+- Tahap 3 (login & akun), 14/11/2026:
+  - **Keputusan pemilik:** NIS/NIP di sekolah pas 6 angka → kata sandi awal = nomor induk tanpa aturan tambahan; Edge Function menolak nomor induk < 6 karakter. Sekolah **menerapkan denda Rp1.000/hari** (migrasi 06 mengisi siswa & guru; bisa diubah di Pengaturan).
+  - Migrasi 06: `tandai_denda_lunas(id_detail)` (petugas saja). Tombolnya dibuat di Tahap 5 (halaman Pengembalian: daftar denda belum lunas).
+  - Migrasi 06: trigger `trg_samakan_status_akun` kini juga mengisi `auth.users.banned_until` → anggota nonaktif ditolak login oleh Supabase Auth (bukan hanya oleh aplikasi). Edge Function `ubah_status` cukup mengubah `anggota.status_anggota`.
+  - Project Supabase pemilik: ref `lsxtzwiftvilplpggvmy`, memakai kunci model baru (`sb_publishable_...`) dan JWT ES256. Karena itu `verify_jwt` gerbang dimatikan untuk `kelola-akun`; fungsi memverifikasi token lewat `auth.getUser(token)` lalu memeriksa role petugas di `profil_pengguna`.
+  - Edge Function `kelola-akun` (satu fungsi, banyak aksi): `cek`, `buat_anggota`, `impor_anggota` (maks 200 baris/permintaan), `reset_sandi`, `ubah_status`, `ubah_nomor_induk`. Selalu menjawab JSON `{ok, pesan, data}`. Dipanggil dari frontend lewat `src/lib/akun.ts` → `kelolaAkun(aksi, isi)`.
+  - Frontend: sesi di `KonteksAuth`; peran dibaca dari `profil_pengguna`, bukan dipilih pengguna. Penjaga route hanya untuk kenyamanan; keamanan data tetap RLS. Ganti kata sandi: `supabase.auth.updateUser` lalu RPC `tandai_sandi_sudah_diganti`; sandi baru min. 6 karakter dan tidak boleh sama dengan username. Di halaman profil/ubah sandi diminta sandi lama (diverifikasi dengan login ulang).
+  - Halaman Profil anggota (info akun, ubah sandi, logout) dan menu "Ubah Kata Sandi" petugas dibuat sekarang karena dibutuhkan untuk logout/uji login.
+  - Sudah diuji ke project Supabase pemilik: login akun seed, penolakan sandi salah/akun nonaktif, pengalihan per peran (23 uji browser). **Belum diuji:** Edge Function versi terpasang (pemilik belum deploy) dan penggantian kata sandi sungguhan (sengaja tidak mengubah sandi akun pemilik).
+  - Catatan Tahap 4: impor Excel harus membaca sel nomor induk sebagai TEKS (NIP 18 digit rusak bila dibaca sebagai angka).
+  - Tugas manual pemilik yang tertunda: jalankan migrasi 06, matikan "Allow new users to sign up", deploy Edge Function (lihat PANDUAN_SUPABASE.md bagian 2–4).
+  - GitHub: pemilik push sendiri ke `main` dari ZIP; push dari sesi cloud masih 403. Hasil tiap tahap dikirim sebagai ZIP.

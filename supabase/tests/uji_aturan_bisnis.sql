@@ -3,6 +3,8 @@
 --
 -- Cara pakai: tempel SELURUH isi file ini di Supabase > SQL Editor > Run.
 -- Hasilnya berupa tabel: setiap baris satu uji, kolom "hasil" berisi LULUS/GAGAL.
+-- Jika muncul peringatan RLS untuk tabel "hasil_uji", pilih "Run without RLS"
+-- (itu hanya tabel sementara penampung hasil uji).
 -- Baris terakhir adalah RINGKASAN.
 --
 -- AMAN DIJALANKAN KAPAN SAJA: skrip membuat data uji sendiri (berawalan "UJI-"),
@@ -274,6 +276,22 @@ begin
     h := h || pg_temp.cek('AB-07', 'Ada denda, status tidak diisi -> otomatis "belum_lunas" (2 hari x Rp500 = Rp1.000)',
                           d.denda = 1000 and d.status_denda = 'belum_lunas', format('denda %s, status %s', d.denda, d.status_denda));
 
+    -- menandai denda lunas (denda dibayar belakangan di meja petugas)
+    select dp.id_detail into v_n
+      from public.detail_peminjaman dp join public.eksemplar e using (id_eksemplar)
+     where e.nomor_induk = 'UJI-E3' order by dp.id_detail desc limit 1;
+    r := pg_temp.sebagai(u_s2, format('select public.tandai_denda_lunas(%s)', v_n));
+    h := h || pg_temp.cek('AB-07', 'Anggota menandai dendanya sendiri lunas -> ditolak', r like 'DITOLAK:Hanya petugas%', r);
+    r := pg_temp.sebagai(u_petugas, format('select public.tandai_denda_lunas(%s) ->> ''status_denda''', v_n));
+    h := h || pg_temp.cek('AB-07', 'Petugas menandai denda "belum_lunas" menjadi lunas -> berhasil', r = 'OK:lunas', r);
+    r := pg_temp.sebagai(u_petugas, format('select public.tandai_denda_lunas(%s)', v_n));
+    h := h || pg_temp.cek('AB-07', 'Menandai lunas denda yang sudah lunas -> ditolak', r like 'DITOLAK:%sudah berstatus lunas%', r);
+    select dp.id_detail into v_n
+      from public.detail_peminjaman dp join public.eksemplar e using (id_eksemplar)
+     where e.nomor_induk = 'UJI-E2' order by dp.id_detail desc limit 1;
+    r := pg_temp.sebagai(u_petugas, format('select public.tandai_denda_lunas(%s)', v_n));
+    h := h || pg_temp.cek('AB-07', 'Menandai lunas pinjaman yang tidak punya denda -> ditolak', r like 'DITOLAK:%tidak memiliki denda%', r);
+
     -- ================= AB-08: sistem tidak pernah otomatis mengubah menjadi "hilang" =================
     r := pg_temp.sebagai(u_petugas, $q$select public.catat_peminjaman('UJI-S2', array['UJI-E7'])$q$);
     update public.detail_peminjaman set tanggal_jatuh_tempo = t - 400
@@ -350,6 +368,8 @@ begin
     update public.anggota set status_anggota = 'nonaktif' where nomor_induk = 'UJI-S1';
     select status::text into r from public.profil_pengguna where id = u_s1;
     h := h || pg_temp.cek('AB-10', 'Anggota dinonaktifkan -> status akun login otomatis ikut "nonaktif"', r = 'nonaktif', r);
+    select (banned_until is not null)::text into r from auth.users where id = u_s1;
+    h := h || pg_temp.cek('AB-10', 'Anggota dinonaktifkan -> akun diblokir login di Supabase Auth', r = 'true', 'diblokir: ' || r);
 
     r := pg_temp.sebagai(u_petugas, $q$select count(*) from public.v_pinjaman where nomor_induk_anggota = 'UJI-S1'$q$);
     h := h || pg_temp.cek('AB-10', 'Riwayat pinjaman anggota nonaktif tetap tersimpan (2 pinjaman)', r = 'OK:2', r);
@@ -359,6 +379,11 @@ begin
 
     r := pg_temp.sebagai(u_s1, $q$select (select count(*) from public.buku) + (select count(*) from public.v_pinjaman) + (select count(*) from public.eksemplar)$q$);
     h := h || pg_temp.cek('AB-10', 'Akun nonaktif yang masih memegang sesi lama tidak bisa membaca data apa pun', r = 'OK:0', r);
+
+    update public.anggota set status_anggota = 'aktif' where nomor_induk = 'UJI-S1';
+    select p.status::text || ', diblokir: ' || (u.banned_until is not null)::text into r
+      from public.profil_pengguna p join auth.users u on u.id = p.id where p.id = u_s1;
+    h := h || pg_temp.cek('AB-10', 'Anggota diaktifkan kembali -> akun aktif lagi dan blokir login dicabut', r = 'aktif, diblokir: false', r);
 
     -- ================= KEAMANAN: RLS dan hak akses =================
     select count(*) into v_n from pg_tables where schemaname = 'public' and not rowsecurity;
