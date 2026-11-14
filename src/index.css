@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-utama-50: #eff6ff;
+  --color-utama-100: #dbeafe;
+  --color-utama-600: #2563eb;
+  --color-utama-700: #1d4ed8;
+  --color-utama-800: #1e40af;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html, body, #root { min-height: 100%; }
+body { @apply bg-slate-50 text-slate-800 antialiased; }
+
+/* Halaman ramah cetak: sembunyikan navigasi saat dicetak */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+}
