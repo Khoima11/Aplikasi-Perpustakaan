@@ -221,6 +221,19 @@ begin
     r := pg_temp.sebagai(u_petugas, $q$select public.catat_perpanjangan('UJI-E6')$q$);
     h := h || pg_temp.cek('AB-05', 'Perpanjangan eksemplar yang tidak sedang dipinjam -> ditolak', r like 'DITOLAK:%tidak sedang dipinjam%', r);
 
+    -- Pilihan A: perpanjangan di hari yang sama dengan hari pinjam tidak menambah jatuh tempo -> ditolak
+    r := pg_temp.sebagai(u_petugas, $q$select public.catat_peminjaman('UJI-G1', array['UJI-E8'])$q$);
+    r := pg_temp.sebagai(u_petugas, $q$select (public.cari_pinjaman_aktif('UJI-E8') ->> 'boleh_diperpanjang') || '|' || (public.cari_pinjaman_aktif('UJI-E8') ->> 'alasan_tidak_bisa_diperpanjang')$q$);
+    h := h || pg_temp.cek('AB-05', 'Pratinjau: pinjaman baru hari ini -> tidak bisa diperpanjang karena jatuh tempo tidak bertambah', r like 'OK:false|Perpanjangan belum diperlukan%', r);
+    r := pg_temp.sebagai(u_petugas, $q$select public.catat_perpanjangan('UJI-E8')$q$);
+    select dp.jumlah_perpanjangan, dp.tanggal_jatuh_tempo into d
+      from public.detail_peminjaman dp join public.eksemplar e using (id_eksemplar)
+     where e.nomor_induk = 'UJI-E8' and dp.status = 'dipinjam';
+    h := h || pg_temp.cek('AB-05', 'Perpanjang di hari yang sama dengan hari pinjam -> ditolak, jatah perpanjangan TIDAK terpakai',
+                          r like 'DITOLAK:Perpanjangan belum diperlukan%' and d.jumlah_perpanjangan = 0 and d.tanggal_jatuh_tempo = t + 14,
+                          format('%s | perpanjangan %s, jatuh tempo %s', r, d.jumlah_perpanjangan, d.tanggal_jatuh_tempo));
+    r := pg_temp.sebagai(u_petugas, $q$select public.catat_pengembalian('UJI-E8', 'baik')$q$);
+
     -- ================= AB-06 & AB-07: hari terlambat dan denda =================
     r := pg_temp.sebagai(u_petugas, $q$select public.catat_pengembalian('UJI-E2', 'baik')$q$);
     select dp.hari_terlambat, dp.denda, dp.status_denda, dp.status, e.status as status_eks into d

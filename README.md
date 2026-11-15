@@ -86,7 +86,7 @@ Isi tiga baris ini, lalu simpan:
 ```
 VITE_SUPABASE_URL=https://xxxxxxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=sb_publishable_xxxxxxxxxxxx
-VITE_NAMA_SEKOLAH=Nama Sekolah Anda
+VITE_NAMA_SEKOLAH=Suthan Jaya Erlangga
 ```
 
 Pasang bahan-bahannya (sekali saja, atau setiap kali ada pembaruan):
@@ -145,7 +145,7 @@ git push
    |---|---|
    | `VITE_SUPABASE_URL` | Project URL dari Supabase |
    | `VITE_SUPABASE_ANON_KEY` | Kunci Publishable dari Supabase |
-   | `VITE_NAMA_SEKOLAH` | Nama sekolah, misalnya `SMP Negeri 1 Contoh` |
+   | `VITE_NAMA_SEKOLAH` | `Suthan Jaya Erlangga` |
 
    **Jangan** menambahkan kunci Secret / service_role di sini.
 6. Klik **Deploy** dan tunggu 1–2 menit sampai muncul tulisan **Congratulations**.
@@ -221,7 +221,9 @@ kategori), Pinjaman (aktif dan riwayat), Profil (ubah kata sandi, logout).
   mencapai batas jumlah pinjam.
 - Buku referensi (hanya dibaca di tempat) dan eksemplar yang tidak tersedia tidak bisa dipinjam.
 - Jatuh tempo dihitung otomatis dan disimpan; mengubah aturan tidak mengubah pinjaman lama.
-- Perpanjangan ditolak jika sudah terlambat atau batas perpanjangan tercapai.
+- Perpanjangan ditolak jika sudah terlambat, batas perpanjangan tercapai, atau jatuh tempo tidak
+  akan bertambah (misalnya diperpanjang di hari yang sama dengan hari pinjam). Jatuh tempo baru
+  dihitung dari tanggal perpanjangan ditambah lama pinjam.
 - Denda = hari terlambat × denda per hari.
 - Buku yang terlambat **tidak pernah** otomatis dianggap hilang; status rusak/hilang hanya
   ditetapkan petugas.

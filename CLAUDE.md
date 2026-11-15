@@ -28,7 +28,7 @@ Tidak ada pendaftaran mandiri. Akun anggota dibuat petugas.
 | AB-02 | Anggota boleh meminjam jika akun aktif, tidak punya pinjaman lewat jatuh tempo, dan (pinjaman aktif + buku baru) ≤ `maks_pinjam`. |
 | AB-03 | Eksemplar boleh dipinjam jika `status = 'tersedia'` dan `buku.dapat_dipinjam = true` (buku referensi = baca di tempat). |
 | AB-04 | Jatuh tempo = tanggal pinjam + `lama_pinjam_hari` sesuai jenis anggota, **disimpan** saat transaksi. |
-| AB-05 | Perpanjangan hanya jika belum terlambat dan `jumlah_perpanjangan < maks_perpanjangan`. Jatuh tempo baru = tanggal perpanjangan + `lama_pinjam_hari`. |
+| AB-05 | Perpanjangan hanya jika belum terlambat dan `jumlah_perpanjangan < maks_perpanjangan`. Jatuh tempo baru = tanggal perpanjangan + `lama_pinjam_hari`. **Tambahan (pilihan A pemilik):** ditolak bila jatuh tempo baru tidak lebih jauh dari yang lama; jatah tidak terpakai. |
 | AB-06 | Hari terlambat = tanggal kembali − jatuh tempo (hari kalender, minimal 0). |
 | AB-07 | Denda = hari terlambat × `denda_per_hari` (boleh 0). |
 | AB-08 | Sistem TIDAK PERNAH otomatis mengubah eksemplar menjadi `hilang`. Rusak/hilang hanya ditetapkan petugas. |
@@ -107,10 +107,10 @@ src/
   pages/anggota/            halaman anggota
   pages/                    Login, GantiKataSandi
 supabase/
-  migrations/               SQL berurutan: 01 enum+tabel, 02 fungsi bantu+trigger, 03 view, 04 RLS, 05 fungsi sirkulasi, 06 denda+blokir login, 07 view anggota+bucket sampul, 08 nama petugas di v_pinjaman
+  migrations/               SQL berurutan: 01 enum+tabel, 02 fungsi bantu+trigger, 03 view, 04 RLS, 05 fungsi sirkulasi, 06 denda+blokir login, 07 view anggota+bucket sampul, 08 nama petugas di v_pinjaman, 09 perpanjangan yang tidak menambah jatuh tempo ditolak
   pasang_struktur_database.sql   GABUNGAN semua migrasi (dibuat `npm run gabung-sql`, jangan diedit langsung)
   seed.sql                  data contoh (bukan data siswa asli)
-  tests/uji_aturan_bisnis.sql    79 uji AB-01..AB-10 + RLS; aman dijalankan kapan saja (membatalkan perubahannya)
+  tests/uji_aturan_bisnis.sql    81 uji AB-01..AB-10 + RLS; aman dijalankan kapan saja (membatalkan perubahannya)
   tests/00_tiruan_supabase_lokal.sql  HANYA untuk uji di PostgreSQL biasa, jangan dijalankan di Supabase
   functions/kelola-akun/index.ts  Edge Function manajemen akun (satu file, bisa ditempel di editor dashboard)
   config.toml               verify_jwt = false untuk kelola-akun (fungsi memeriksa sendiri)
@@ -131,7 +131,7 @@ README.md                   panduan utama: setup Supabase, menjalankan lokal, de
 ## 8. Log keputusan
 - Tahap 0: ID petugas pola `PTG001`; kata sandi awal = NIS/NIP/ID dan wajib ganti; format impor Excel seperti bagian 4.
 - Tahap 0: kolom tambahan `detail_peminjaman.catatan_kembali` (untuk kolom "Catatan" di wireframe pengembalian); `jenis_kelamin` dan `no_hp` jadi kolom opsional di impor Excel; peringatan "mendekati jatuh tempo" = 2 hari sebelumnya.
-- Tahap 1: nama sekolah belum ditentukan → dibaca dari `VITE_NAMA_SEKOLAH` di `.env` (default "Nama Sekolah"). Tailwind v4 (plugin `@tailwindcss/vite`, tema di `src/index.css`). Ikon PWA dibuat dari `public/favicon.svg`. `vercel.json` berisi rewrite agar route React Router jalan di Vercel.
+- Tahap 1: nama sekolah dibaca dari `VITE_NAMA_SEKOLAH` di `.env` (bawaan kini "Suthan Jaya Erlangga", lihat log 15/11/2026). Tailwind v4 (plugin `@tailwindcss/vite`, tema di `src/index.css`). Ikon PWA dibuat dari `public/favicon.svg`. `vercel.json` berisi rewrite agar route React Router jalan di Vercel.
 - Tahap 2 (database):
   - Objek database: view `v_ketersediaan_buku`, `v_pinjaman` (semua pinjaman + kolom hitung `terlambat`, `hari_lewat_jatuh_tempo`), `v_keterlambatan`; semuanya `security_invoker`.
   - Fungsi tambahan di luar 4 fungsi wajib: `cari_pinjaman_aktif(nomor_induk_eksemplar)` (pratinjau hari terlambat/denda/boleh diperpanjang untuk halaman Pengembalian, hanya baca), `catat_login()`, `tandai_sandi_sudah_diganti()`, `hari_ini_wib()`, `adalah_petugas()`, `pengguna_aktif()`, `id_anggota_saya()`.
@@ -211,3 +211,5 @@ README.md                   panduan utama: setup Supabase, menjalankan lokal, de
   - Sampul pengganti (buku tanpa gambar): gradasi warna tetap per judul + punggung buku + judul tertulis. Tidak memakai warna merah agar tidak tertukar dengan tanda terlambat.
   - Ikon PWA dan `theme_color` diganti cokelat.
   - Uji browser disesuaikan dengan menu bernama (`nav[aria-label=...]`); hasil: database 79, sirkulasi 50, dashboard+laporan 36, login 23, anggota 71, data master 54 = 313 lulus. Tidak ada perubahan database/Edge Function.
+- Jawaban pemilik sebelum deploy, 15/11/2026: nama sekolah **Suthan Jaya Erlangga** (jadi nilai bawaan `NAMA_SEKOLAH` di `src/lib/config.ts` dan `.env.example`; tampil di bukti & laporan sebagai "PERPUSTAKAAN SUTHAN JAYA ERLANGGA"); uji coba online **tetap memakai data contoh** di project Supabase yang sekarang. Aturan perpanjangan: lihat entri berikutnya.
+- Aturan perpanjangan DIPUTUSKAN pemilik: **pilihan A** (15/11/2026). Migrasi 09 mengganti `cari_pinjaman_aktif` dan `catat_perpanjangan`: rumus AB-05 tetap (tanggal perpanjangan + lama pinjam), tetapi bila hasilnya `<=` jatuh tempo saat ini perpanjangan ditolak dengan pesan "Perpanjangan belum diperlukan: jatuh tempo tidak akan bertambah (tetap dd/mm/yyyy)..." dan `jumlah_perpanjangan` tidak bertambah. Halaman Pengembalian otomatis mengunci tombol Perpanjang dengan alasan itu. Uji: database 81 (2 baru), sirkulasi 50 — lulus.
