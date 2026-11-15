@@ -12,8 +12,16 @@
 html, body, #root { min-height: 100%; }
 body { @apply bg-slate-50 text-slate-800 antialiased; }
 
-/* Halaman ramah cetak: sembunyikan navigasi saat dicetak */
+/* Halaman ramah cetak: bukti peminjaman dan laporan */
 @media print {
+  @page { size: A4; margin: 14mm; }
   .no-print { display: none !important; }
   body { background: white; }
+  main { padding: 0 !important; }
+  /* tabel laporan: huruf kecil, bergaris, judul kolom berulang di tiap halaman */
+  .tabel-laporan { border-collapse: collapse; }
+  .tabel-laporan th,
+  .tabel-laporan td { border: 1px solid #64748b; padding: 3px 6px !important; font-size: 10px !important; }
+  .tabel-laporan thead { display: table-header-group; }
+  .tabel-laporan tr { break-inside: avoid; }
 }

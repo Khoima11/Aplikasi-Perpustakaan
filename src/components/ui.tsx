@@ -65,9 +65,9 @@ export function Pemberitahuan({ pesan, onTutup }: { pesan: Pesan | null; onTutup
 export function KartuRingkas({ label, nilai, warna }: { label: string; nilai: ReactNode; warna?: 'oranye' | 'hijau' }) {
   const warnaNilai = warna === 'oranye' ? 'text-orange-600' : warna === 'hijau' ? 'text-green-700' : 'text-slate-800'
   return (
-    <div className={`${kelas.kartu} p-4 text-center`}>
-      <div className="text-sm text-slate-500">{label}</div>
-      <div className={`mt-1 text-3xl font-bold ${warnaNilai}`}>{nilai}</div>
+    <div className={`${kelas.kartu} p-4 text-center print:p-2`}>
+      <div className="text-sm text-slate-500 print:text-xs">{label}</div>
+      <div className={`mt-1 text-3xl font-bold print:mt-0 print:text-xl ${warnaNilai}`}>{nilai}</div>
     </div>
   )
 }

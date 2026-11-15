@@ -99,7 +99,7 @@ pembayaran denda online, barcode scanner/RFID, integrasi perpustakaan lain, akun
 docs/                       dokumen kebutuhan (acuan utama)
 public/                     ikon PWA
 src/
-  lib/                      supabase client, tanggal WIB, format rupiah, galat (terjemahan error DB), cari (filter aman), sampul, akun (Edge Function), imporAnggota (format kolom Excel), sirkulasi (pemanggil fungsi transaksi)
+  lib/                      supabase client, tanggal WIB, format rupiah, galat (terjemahan error DB), cari (filter aman), sampul, akun (Edge Function), imporAnggota (format kolom Excel), sirkulasi (pemanggil fungsi transaksi), laporan (penyusun isi 4 laporan), ambilSemua (ambil data berhalaman)
   auth/                     KonteksAuth (sesi+profil, masuk/keluar), Penjaga (WajibLogin, HanyaTamu, ArahkanAwal)
   layouts/                  LayoutPetugas (sidebar), LayoutAnggota (navigasi bawah)
   components/               komponen UI bersama (`ui.tsx`: kelas tombol/input, Lencana, Modal, Konfirmasi, Pemberitahuan, Paginasi; `anggota.tsx`: SampulBuku, kartu pinjaman, penanda jatuh tempo/ketersediaan)
@@ -182,3 +182,14 @@ PANDUAN_SUPABASE.md         langkah memasang/memperbarui database, Edge Function
   - Riwayat juga menampilkan keterlambatan dan denda milik anggota itu (lunas/belum lunas) — hanya informasi, tanpa aksi.
   - Halaman anggota tidak mengirim permintaan tulis apa pun (terbukti di uji: hanya `catat_login`).
   - Pengujian: `scripts/uji-lokal/uji-anggota.cjs` — 71 uji browser (iPhone 13) LANGSUNG ke project pemilik dengan 5 akun contoh; nilai harapan diambil dari API dengan token yang sama. Termasuk gambar sampul dari Storage, RLS (hanya pinjaman sendiri), ukuran sentuh >= 44px, tanpa gulir samping.
+- Tahap 7 (laporan & dashboard), 15/11/2026:
+  - Tidak ada migrasi baru. Isi laporan dihitung di browser dari `v_pinjaman`, `v_ketersediaan_buku`, dan `eksemplar` (`src/lib/laporan.ts`); data diambil berhalaman 1.000 baris (`ambilSemua`) karena batas baris Supabase.
+  - Dashboard: 4 angka (peminjaman/pengembalian hari ini dihitung PER BUKU, jatuh tempo hari ini, terlambat + "Lihat daftar"), tombol pintas, grafik batang 7 hari (CSS biasa, tanpa library), ringkasan koleksi, tabel jatuh tempo hari ini (nomor induk menaut ke Pengembalian).
+  - Laporan (4 tab, periode bawaan tanggal 1 bulan ini s.d. hari ini, langsung tampil saat tab dibuka):
+    - Peminjaman: periode dari TANGGAL PINJAM; ringkasan transaksi/buku/anggota/"Pengembalian Terlambat" (kembali terlambat + masih terlambat).
+    - Keterlambatan: periode dari TANGGAL JATUH TEMPO; pinjaman yang kembali terlambat atau masih terlambat; denda tercatat hanya untuk yang sudah kembali.
+    - Buku Terpopuler: periode dari tanggal pinjam; peringkat per judul + "judul tidak dipinjam".
+    - Koleksi: keadaan SAAT INI (per kategori + daftar eksemplar rusak/hilang); periode hanya dipakai untuk "eksemplar masuk pada periode".
+  - Cetak/Unduh PDF: mencatat satu baris ke tabel `laporan` (jenis, periode, petugas) lalu `window.print()`. Tombol terkunci bila periode diubah tetapi belum ditampilkan. Tampilan cetak: kepala laporan (nama perpustakaan, judul, periode), tabel bergaris, "dicetak oleh", kolom tanda tangan Kepala Sekolah dan Petugas (hanya muncul saat dicetak).
+  - Alat uji: `db-lokal.cjs` kini menjawab saringan sederhana (eq/neq/gt/gte/lt/lte/is/in), order, Range, dan hitung (HEAD + count). Bentuk kueri yang sama sudah dicek diterima PostgREST project pemilik (hanya baca, sebagai anggota).
+  - Hasil uji terakhir: dashboard+laporan 36, sirkulasi 50, anggota 71, login 23, database 79 — semua lulus. **Belum diuji di project pemilik dengan sesi petugas:** Dashboard dan Laporan (angka seluruh sekolah hanya terbaca petugas).

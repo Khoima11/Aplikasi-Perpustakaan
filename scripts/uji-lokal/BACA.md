@@ -13,6 +13,7 @@ RLS, dan pesan penolakannya sungguhan.
 | `siapkan-db.sh` | Membuat ulang database `simpus_uji` (tiruan Supabase + migrasi + seed) |
 | `db-lokal.cjs` | Penjawab permintaan REST dari database lokal |
 | `uji-sirkulasi.cjs` | 50 uji: keterlambatan, peminjaman, bukti, pengembalian, perpanjangan, denda |
+| `uji-dashboard-laporan.cjs` | 36 uji: angka dashboard, grafik, keempat laporan, histori cetak, tampilan cetak (angka harapan dihitung dengan SQL) |
 | `uji-anggota.cjs` | 71 uji halaman anggota; hanya membaca, langsung ke Supabase di `.env` (tidak butuh database lokal) |
 
 Menjalankan (database lokal harus disegarkan dulu karena uji mengubah datanya):
@@ -21,6 +22,8 @@ Menjalankan (database lokal harus disegarkan dulu karena uji mengubah datanya):
 scripts/uji-lokal/siapkan-db.sh
 npm run build && npx vite preview --port 4173 &
 node scripts/uji-lokal/uji-sirkulasi.cjs
+scripts/uji-lokal/siapkan-db.sh          # segarkan lagi sebelum uji berikutnya
+node scripts/uji-lokal/uji-dashboard-laporan.cjs
 ```
 
 Syarat: PostgreSQL lokal, Playwright, dan file `.env` yang terisi (login uji memakai akun
