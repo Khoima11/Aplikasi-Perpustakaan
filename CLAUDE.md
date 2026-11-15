@@ -118,6 +118,7 @@ supabase/
 scripts/gabung-sql.mjs      pembuat file gabungan migrasi
 scripts/uji-lokal/          alat uji pengembang: halaman dijalankan di browser, data dijawab PostgreSQL lokal (lihat BACA.md)
 PANDUAN_SUPABASE.md         langkah memasang/memperbarui database, Edge Function, dan .env (bahasa sederhana)
+README.md                   panduan utama: setup Supabase, menjalankan lokal, deploy Vercel, pemakaian, masalah umum
 ```
 
 ## 7. Cara kerja
@@ -193,3 +194,10 @@ PANDUAN_SUPABASE.md         langkah memasang/memperbarui database, Edge Function
   - Cetak/Unduh PDF: mencatat satu baris ke tabel `laporan` (jenis, periode, petugas) lalu `window.print()`. Tombol terkunci bila periode diubah tetapi belum ditampilkan. Tampilan cetak: kepala laporan (nama perpustakaan, judul, periode), tabel bergaris, "dicetak oleh", kolom tanda tangan Kepala Sekolah dan Petugas (hanya muncul saat dicetak).
   - Alat uji: `db-lokal.cjs` kini menjawab saringan sederhana (eq/neq/gt/gte/lt/lte/is/in), order, Range, dan hitung (HEAD + count). Bentuk kueri yang sama sudah dicek diterima PostgREST project pemilik (hanya baca, sebagai anggota).
   - Hasil uji terakhir: dashboard+laporan 36, sirkulasi 50, anggota 71, login 23, database 79 — semua lulus. **Belum diuji di project pemilik dengan sesi petugas:** Dashboard dan Laporan (angka seluruh sekolah hanya terbaca petugas).
+- Tahap 8 (pengujian menyeluruh, README, deploy), 15/11/2026:
+  - Semua uji dipindah ke `scripts/uji-lokal/` dan dijalankan dari project: database 79, sirkulasi 50, dashboard+laporan 36, login 23, anggota 71, data master 54 = **313 lulus, 0 gagal**. `uji-data-master` kini mengambil nilai harapan dari data sebenarnya (tidak lagi mengandaikan jumlah seed).
+  - Audit: tidak ada kunci rahasia di kode/hasil build (hanya kunci publishable); `.env`, `dist`, `node_modules`, keluaran uji tidak ikut git; komponen `HalamanSementara` yang tidak terpakai dihapus; `package.json` diberi `engines.node >= 20`.
+  - `npm audit` melaporkan celah tingkat sedang pada paket pembangun PWA (`workbox-build` → `glob`/`deepmerge`). Itu hanya alat saat build, tidak ikut ke aplikasi di browser; perbaikannya menurunkan `vite-plugin-pwa` ke versi lama (perubahan besar), jadi sengaja tidak dilakukan.
+  - README.md ditulis (setup Supabase, lokal, deploy Vercel langkah demi langkah, pasang di HP, pemakaian, pembaruan, masalah umum, keamanan).
+  - Deploy ke Vercel dilakukan PEMILIK lewat dashboard Vercel (sesi ini tidak punya akses Vercel/GitHub). Menunggu konfirmasi pemilik sebelum memandu deploy.
+  - Masih menunggu jawaban pemilik: nama sekolah (`VITE_NAMA_SEKOLAH`), aturan perpanjangan (A/B/biarkan), dan apakah data contoh tetap dipakai saat uji coba online.
