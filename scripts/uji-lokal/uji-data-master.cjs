@@ -111,7 +111,7 @@ const anggotaTiruan = [
   await page.waitForURL('**/petugas');
 
   // ================= DATA KATEGORI =================
-  await page.click('nav >> text=Data Kategori'); await page.waitForSelector('tbody tr td:nth-child(2)');
+  await page.click('nav[aria-label="Menu samping"] >> text=Data Kategori'); await page.waitForSelector('tbody tr td:nth-child(2)');
   await page.waitForFunction((n) => document.querySelectorAll('tbody tr').length >= n, nKat);
   cek('Kategori: ' + nKat + ' kategori tampil (sesuai data)', await page.locator('tbody tr').count() === nKat);
   const ringkas = await page.locator('.text-3xl').allTextContents();
@@ -139,7 +139,7 @@ const anggotaTiruan = [
   cek('Kategori: hapus yang masih dipakai -> DELETE ditolak dengan pesan jelas', terakhir().m === 'DELETE');
 
   // ================= DATA BUKU =================
-  await page.click('nav >> text=Data Buku'); await page.waitForSelector('text=' + totalBuku + ' judul buku');
+  await page.click('nav[aria-label="Menu samping"] >> text=Data Buku'); await page.waitForSelector('text=' + totalBuku + ' judul buku');
   cek('Buku: halaman 1 berisi 20 baris dari ' + totalBuku + ' judul', await page.locator('tbody tr').count() === Math.min(20, totalBuku));
   await page.screenshot({ path: dir + '/t4-buku.png' });
   await page.click('text=Berikutnya'); await page.waitForSelector('text=Halaman 2 dari 2');
@@ -190,7 +190,7 @@ const anggotaTiruan = [
   cek('Buku baru: POST buku lalu pindah ke halaman detailnya', pb && pb.isi.judul === 'Buku Uji' && pb.isi.dapat_dipinjam === true && pb.isi.isbn === null, pb);
 
   // ================= PENGATURAN =================
-  await page.click('nav >> text=Pengaturan'); await page.waitForSelector('tbody >> text=Guru');
+  await page.click('nav[aria-label="Menu samping"] >> text=Pengaturan'); await page.waitForSelector('tbody >> text=Guru');
   const tabel = await page.textContent('tbody');
   cek('Pengaturan: tabel menampilkan aturan siswa & guru sesuai data', tabel.includes(aturan.siswa.maks_pinjam + ' buku') && tabel.includes(aturan.guru.maks_pinjam + ' buku') && tabel.includes(rp(aturan.siswa.denda_per_hari)), tabel);
   await page.waitForFunction(() => document.querySelector('#maks').value !== '');
@@ -205,7 +205,7 @@ const anggotaTiruan = [
   await page.screenshot({ path: dir + '/t4-pengaturan.png' });
 
   // ================= DATA ANGGOTA =================
-  await page.click('nav >> text=Data Anggota'); await page.waitForSelector('text=Andi Pratama');
+  await page.click('nav[aria-label="Menu samping"] >> text=Data Anggota'); await page.waitForSelector('text=Andi Pratama');
   cek('Anggota: daftar tampil dengan penanda terlambat dan nonaktif', (await page.textContent('tbody')).includes('1 terlambat') && (await page.textContent('tbody')).includes('Nonaktif'));
   cek('Anggota: anggota nonaktif mendapat tombol Aktifkan', await page.locator('tbody tr', { hasText: 'Gilang' }).locator('text=Aktifkan').count() === 1);
   await page.screenshot({ path: dir + '/t4-anggota.png' });

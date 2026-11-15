@@ -42,7 +42,7 @@ const statusEks = (no) => pemilik("select status from public.eksemplar where nom
   await page.waitForURL('**/petugas');
 
   // ================= DAFTAR KETERLAMBATAN =================
-  await page.click('nav >> text=Keterlambatan'); await tunggu('Eko Saputra');
+  await page.click('nav[aria-label="Menu samping"] >> text=Keterlambatan'); await tunggu('Eko Saputra');
   const kartu = await page.locator('.text-3xl').allTextContents();
   cek('Keterlambatan: ringkasan 3 pinjaman terlambat, 3 anggota, 1 lebih dari 30 hari', kartu.join(',') === '3,3,1', kartu);
   let baris = await page.locator('tbody tr').allTextContents();
@@ -64,7 +64,7 @@ const statusEks = (no) => pemilik("select status from public.eksemplar where nom
   cek('Keterlambatan -> Proses Pengembalian: data pinjaman langsung terbuka', (await page.textContent('main')).includes('Eko Saputra (230005)') && (await page.inputValue('[aria-label="Nomor induk eksemplar"]')) === 'B0019');
 
   // ================= PEMINJAMAN =================
-  await page.click('nav >> text=Peminjaman'); await tunggu('1. Data Anggota');
+  await page.click('nav[aria-label="Menu samping"] >> text=Peminjaman'); await tunggu('1. Data Anggota');
   const cariAnggota = async (n) => { await page.fill('[aria-label="NIS atau NIP anggota"]', n); await page.click('button:has-text("Cari")'); };
   const tambah = async (n) => { await page.fill('[aria-label="Nomor induk eksemplar"]', n); await page.click('button:has-text("+ Tambah")'); };
   await tunggu('Dewi Anggraini');
@@ -124,7 +124,7 @@ const statusEks = (no) => pemilik("select status from public.eksemplar where nom
   await page.click('button:has-text("Batal")');
 
   // ================= PENGEMBALIAN & PERPANJANGAN =================
-  await page.click('nav >> text=Pengembalian'); await tunggu('Denda Belum Lunas');
+  await page.click('nav[aria-label="Menu samping"] >> text=Pengembalian'); await tunggu('Denda Belum Lunas');
   const cariPinjaman = async (n) => { await page.fill('[aria-label="Nomor induk eksemplar"]', n); await page.click('button:has-text("Cari Pinjaman")'); };
   await cariPinjaman('B9999'); await tunggu('tidak ditemukan');
   cek('Pengembalian: nomor induk tidak dikenal -> pesan jelas', true);
@@ -174,9 +174,9 @@ const statusEks = (no) => pemilik("select status from public.eksemplar where nom
   await page.screenshot({ path: dir + '/t5-pengembalian-akhir.png', fullPage: true });
 
   // setelah buku kembali, anggota boleh meminjam lagi; daftar keterlambatan kosong
-  await page.click('nav >> text=Peminjaman'); await cariAnggota('240003'); await tunggu('Boleh meminjam');
+  await page.click('nav[aria-label="Menu samping"] >> text=Peminjaman'); await cariAnggota('240003'); await tunggu('Boleh meminjam');
   cek('AB-02: setelah buku terlambat dikembalikan, Cahyo boleh meminjam lagi (0 / 2)', (await page.textContent('main')).includes('0 / 2'));
-  await page.click('nav >> text=Keterlambatan'); await tunggu('Tidak ada pinjaman yang terlambat');
+  await page.click('nav[aria-label="Menu samping"] >> text=Keterlambatan'); await tunggu('Tidak ada pinjaman yang terlambat');
   cek('Keterlambatan: kosong setelah semua pinjaman terlambat diproses', (await page.locator('.text-3xl').allTextContents()).join(',') === '0,0,0');
 
   cek('Semua permintaan data dijawab alat uji (tidak ada yang lolos tak tertangani)', tidakDitangani.length === 0, tidakDitangani);

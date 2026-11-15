@@ -79,15 +79,15 @@ const WIB = "(tanggal_pinjam at time zone 'Asia/Jakarta')::date";
   await page.screenshot({ path: path.join(dir, 't7-dashboard.png'), fullPage: true });
   await page.click('text=Lihat daftar'); await page.waitForURL('**/petugas/keterlambatan');
   cek('Dashboard: "Lihat daftar" membuka Daftar Keterlambatan', true);
-  await page.click('nav >> text=Dashboard'); await page.waitForSelector('text=Ringkasan Koleksi');
+  await page.click('nav[aria-label="Menu samping"] >> text=Dashboard'); await page.waitForSelector('text=Ringkasan Koleksi');
   await page.click('a:has-text("+ Catat Peminjaman")'); await page.waitForURL('**/petugas/peminjaman');
-  await page.click('nav >> text=Dashboard'); await page.click('a:has-text("Catat Pengembalian")'); await page.waitForURL('**/petugas/pengembalian');
+  await page.click('nav[aria-label="Menu samping"] >> text=Dashboard'); await page.click('a:has-text("Catat Pengembalian")'); await page.waitForURL('**/petugas/pengembalian');
   cek('Dashboard: tombol pintas Catat Peminjaman dan Catat Pengembalian berfungsi', true);
-  await page.click('nav >> text=Dashboard'); await page.waitForSelector('a:has-text("B0036")'); await page.click('a:has-text("B0036")'); await page.waitForURL('**/pengembalian?no=B0036'); await page.waitForSelector('text=Data Pinjaman');
+  await page.click('nav[aria-label="Menu samping"] >> text=Dashboard'); await page.waitForSelector('a:has-text("B0036")'); await page.click('a:has-text("B0036")'); await page.waitForURL('**/pengembalian?no=B0036'); await page.waitForSelector('text=Data Pinjaman');
   cek('Dashboard: klik nomor induk jatuh tempo langsung membuka pengembaliannya', (await page.innerText('main')).includes('Fitri Handayani'));
 
   // ================= LAPORAN =================
-  await page.click('nav >> text=Laporan'); await page.waitForSelector('h2:text-is("Hasil Laporan")');
+  await page.click('nav[aria-label="Menu samping"] >> text=Laporan'); await page.waitForSelector('h2:text-is("Hasil Laporan")');
   cek('Laporan: periode awal bawaan = tanggal 1 bulan ini s.d. hari ini', (await page.inputValue('#awal')) === iso(0).slice(0, 8) + '01' && (await page.inputValue('#akhir')) === iso(0));
   const atur = async (a, z) => { await page.fill('#awal', a); await page.fill('#akhir', z); await page.click('button:has-text("Tampilkan")'); await page.waitForFunction(() => !document.querySelector('button[type=submit]').disabled); };
   const ringkas = () => page.locator('.text-3xl').allTextContents();

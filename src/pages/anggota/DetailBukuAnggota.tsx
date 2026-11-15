@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { pesanGalat } from '../../lib/galat'
 import { KeadaanKosong, SampulBuku, type BukuKatalog } from '../../components/anggota'
-import { Lencana, type WarnaLencana } from '../../components/ui'
+import { Lencana, kelas, type WarnaLencana } from '../../components/ui'
 
 interface BukuLengkap extends BukuKatalog {
   penerbit: string | null
@@ -57,7 +57,7 @@ export default function DetailBukuAnggota() {
 
   const kembali = () => (window.history.length > 1 ? navigate(-1) : navigate('/anggota/katalog'))
   const tombolKembali = (
-    <button onClick={kembali} className="min-h-11 rounded-lg border border-slate-300 px-4 text-sm text-slate-700 active:bg-slate-50">
+    <button onClick={kembali} className={kelas.tombol}>
       ‹ Kembali
     </button>
   )
@@ -68,7 +68,7 @@ export default function DetailBukuAnggota() {
       <div className="space-y-3">
         {tombolKembali}
         {keadaan === 'galat' ? (
-          <p role="alert" className="rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-900">{galat}</p>
+          <p role="alert" className="rounded-xl bg-orange-50 px-3 py-2 text-sm text-orange-900">{galat}</p>
         ) : (
           <KeadaanKosong>Buku tidak ditemukan.</KeadaanKosong>
         )}
@@ -77,46 +77,66 @@ export default function DetailBukuAnggota() {
   }
 
   const tersedia = keteranganTersedia(buku)
-  const baris: [string, React.ReactNode][] = [
+  const info: [string, ReactNode][] = [
     ['Penerbit', buku.penerbit ?? '-'],
     ['Tahun', buku.tahun_terbit ?? '-'],
     ['Kategori', buku.nama_kategori],
     ['Lokasi Rak', buku.lokasi_rak ?? '-'],
-    ['Ketersediaan', <Lencana warna={tersedia.warna}>{tersedia.teks}</Lencana>],
   ]
 
   return (
     <div>
       {tombolKembali}
-      <div className="mt-4 flex justify-center">
-        <SampulBuku sampul={buku.sampul} judul={buku.judul} className="aspect-[2/3] w-40 text-5xl" />
+
+      <div className="mt-5 md:grid md:grid-cols-[15rem_1fr] md:gap-10">
+        {/* Sampul */}
+        <div className="flex gap-4 md:block">
+          <SampulBuku sampul={buku.sampul} judul={buku.judul} ukuran="besar" className="aspect-[2/3] w-32 sm:w-40 md:w-full" />
+          {/* Judul di samping sampul (HP) */}
+          <div className="min-w-0 flex-1 pt-1 md:hidden">
+            <h1 className="text-xl font-bold leading-snug text-utama-900">{buku.judul}</h1>
+            <p className="mt-0.5 text-slate-500">{buku.pengarang ?? '-'}</p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <Lencana warna={tersedia.warna}>{tersedia.teks}</Lencana>
+              {!buku.dapat_dipinjam && <Lencana warna="biru">Hanya dibaca di tempat</Lencana>}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 md:mt-0">
+          {/* Judul (komputer) */}
+          <div className="hidden md:block">
+            <h1 className="text-3xl font-bold leading-tight text-utama-900">{buku.judul}</h1>
+            <p className="mt-1 text-lg text-slate-500">{buku.pengarang ?? '-'}</p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <Lencana warna={tersedia.warna}>{tersedia.teks}</Lencana>
+              {!buku.dapat_dipinjam && <Lencana warna="biru">Hanya dibaca di tempat</Lencana>}
+            </div>
+          </div>
+
+          <dl className="grid grid-cols-2 gap-3 md:mt-6 lg:grid-cols-4">
+            {info.map(([label, nilai]) => (
+              <div key={label} className="rounded-2xl border border-utama-100/70 bg-white px-4 py-3 shadow-kartu">
+                <dt className="text-xs text-slate-500">{label}</dt>
+                <dd className="mt-0.5 font-medium text-utama-900">{nilai}</dd>
+              </div>
+            ))}
+          </dl>
+
+
+          <h2 className="mt-6 text-lg font-semibold text-utama-900">Sinopsis</h2>
+          <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-slate-700">{buku.sinopsis || 'Belum ada sinopsis.'}</p>
+
+          <p className="mt-6 flex items-start gap-3 rounded-2xl border border-utama-200 bg-utama-50 p-4 text-sm text-utama-900">
+            <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-utama-100 font-bold text-utama-700">i</span>
+            <span className="pt-1.5">
+              {buku.dapat_dipinjam
+                ? 'Peminjaman dilakukan langsung di meja petugas perpustakaan.'
+                : 'Buku ini hanya dapat dibaca di ruang perpustakaan dan tidak dapat dipinjam.'}
+            </span>
+          </p>
+        </div>
       </div>
-
-      <h1 className="mt-4 text-xl font-bold leading-snug text-slate-800">{buku.judul}</h1>
-      <p className="italic text-slate-500">{buku.pengarang ?? '-'}</p>
-      {!buku.dapat_dipinjam && (
-        <div className="mt-2"><Lencana warna="biru">Hanya dibaca di tempat</Lencana></div>
-      )}
-
-      <table className="mt-4 w-full border border-slate-200 text-sm">
-        <tbody className="divide-y divide-slate-200">
-          {baris.map(([label, nilai]) => (
-            <tr key={label}>
-              <th className="w-2/5 border-r border-slate-200 bg-slate-50 px-3 py-2.5 text-left font-medium text-slate-600">{label}</th>
-              <td className="px-3 py-2.5">{nilai}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <h2 className="mt-5 font-bold text-slate-800">Sinopsis</h2>
-      <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-700">{buku.sinopsis || 'Belum ada sinopsis.'}</p>
-
-      <p className="mt-5 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-700">
-        {buku.dapat_dipinjam
-          ? 'Peminjaman dilakukan langsung di meja petugas perpustakaan.'
-          : 'Buku ini hanya dapat dibaca di ruang perpustakaan dan tidak dapat dipinjam.'}
-      </p>
     </div>
   )
 }

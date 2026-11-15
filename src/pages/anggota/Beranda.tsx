@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { HARI_PERINGATAN_JATUH_TEMPO } from '../../lib/config'
 import { pesanGalat } from '../../lib/galat'
 import { formatTanggal } from '../../lib/tanggal'
-import { KOLOM_KATALOG, KOLOM_PINJAMAN_SAYA, KartuPinjamanAktif, KeadaanKosong, SampulBuku, type BukuKatalog, type PinjamanSaya } from '../../components/anggota'
+import { JudulBagian, KOLOM_KATALOG, KOLOM_PINJAMAN_SAYA, KartuPinjamanAktif, KeadaanKosong, KolomCari, SampulBuku, type BukuKatalog, type PinjamanSaya } from '../../components/anggota'
 
 /** Menyusun kalimat peringatan seperti di wireframe: per tanggal jatuh tempo dan per lama terlambat */
 function susunPeringatan(pinjaman: PinjamanSaya[]): string[] {
@@ -55,48 +55,54 @@ export default function Beranda() {
   const peringatan = susunPeringatan(pinjaman ?? [])
   const adaTerlambat = (pinjaman ?? []).some((p) => (p.hari_lewat_jatuh_tempo ?? 0) > 0)
 
+  const sapaan = (() => {
+    const jam = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jakarta', hour: '2-digit', hour12: false }).format(new Date()))
+    return jam < 11 ? 'Selamat pagi' : jam < 15 ? 'Selamat siang' : jam < 18 ? 'Selamat sore' : 'Selamat malam'
+  })()
+
   return (
-    <div className="space-y-5">
-      <p className="text-lg">Halo, <b>{profil?.nama}</b></p>
+    <div className="space-y-7">
+      {/* Sapaan dan pencarian */}
+      <section className="relative overflow-hidden rounded-3xl bg-utama-600 px-5 pt-5 pb-6 text-white shadow-kartu md:px-8 md:py-8">
+        <div aria-hidden="true" className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/10" />
+        <div aria-hidden="true" className="absolute -bottom-16 left-1/3 h-40 w-40 rounded-full bg-utama-800/25" />
+        <p className="relative text-sm text-utama-100">{sapaan},</p>
+        <p className="relative text-xl font-semibold md:text-2xl">Halo, {profil?.nama}</p>
+        <p className="relative mt-1 text-sm text-white/80">Mau baca apa hari ini?</p>
+        <form onSubmit={kirimCari} role="search" className="relative mt-4 md:max-w-xl">
+          <KolomCari placeholder="Cari judul atau pengarang..." value={cari} onChange={(e) => setCari(e.target.value)} aria-label="Cari buku" />
+        </form>
+      </section>
 
-      <form onSubmit={kirimCari} role="search">
-        <input
-          type="search"
-          enterKeyHint="search"
-          className="h-12 w-full rounded-xl border border-slate-300 px-4 outline-none focus:border-utama-600 focus:ring-2 focus:ring-utama-100"
-          placeholder="Cari judul atau pengarang..."
-          value={cari}
-          onChange={(e) => setCari(e.target.value)}
-          aria-label="Cari buku"
-        />
-      </form>
-
-      {galat && <p role="alert" className="rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-900">{galat}</p>}
+      {galat && <p role="alert" className="rounded-xl bg-orange-50 px-3 py-2 text-sm text-orange-900">{galat}</p>}
 
       {peringatan.length > 0 && (
-        <section role="alert" className="rounded-xl border-2 border-dashed border-orange-300 bg-orange-50 p-4 text-orange-900">
-          <h2 className="font-bold">Peringatan</h2>
-          <ul className="mt-1 space-y-0.5 text-sm">
-            {peringatan.map((b) => (
-              <li key={b}>{b}</li>
-            ))}
-          </ul>
-          <p className="mt-2 text-xs">
-            {adaTerlambat
-              ? 'Segera kembalikan buku yang terlambat ke meja petugas perpustakaan.'
-              : 'Kembalikan atau perpanjang di meja petugas sebelum jatuh tempo.'}
-          </p>
+        <section role="alert" className="flex gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-orange-900">
+          <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-lg font-bold text-orange-700">!</span>
+          <div>
+            <h2 className="font-semibold">Peringatan</h2>
+            <ul className="mt-0.5 space-y-0.5 text-sm">
+              {peringatan.map((b) => (
+                <li key={b}>{b}</li>
+              ))}
+            </ul>
+            <p className="mt-1.5 text-xs">
+              {adaTerlambat
+                ? 'Segera kembalikan buku yang terlambat ke meja petugas perpustakaan.'
+                : 'Kembalikan atau perpanjang di meja petugas sebelum jatuh tempo.'}
+            </p>
+          </div>
         </section>
       )}
 
       <section>
-        <h2 className="mb-2 font-bold text-slate-800">Pinjaman Aktif</h2>
+        <JudulBagian ke={pinjaman && pinjaman.length > 0 ? '/anggota/pinjaman' : undefined}>Pinjaman Aktif</JudulBagian>
         {pinjaman === null ? (
           <p className="text-sm text-slate-500">Memuat...</p>
         ) : pinjaman.length === 0 ? (
           <KeadaanKosong>Kamu sedang tidak meminjam buku.</KeadaanKosong>
         ) : (
-          <div className="space-y-3">
+          <div className="grid gap-3 md:grid-cols-2">
             {pinjaman.map((p) => (
               <KartuPinjamanAktif key={p.id_detail} p={p} />
             ))}
@@ -105,17 +111,18 @@ export default function Beranda() {
       </section>
 
       <section>
-        <h2 className="mb-2 font-bold text-slate-800">Buku Baru</h2>
+        <JudulBagian ke="/anggota/katalog">Buku Baru</JudulBagian>
         {bukuBaru === null ? (
           <p className="text-sm text-slate-500">Memuat...</p>
         ) : bukuBaru.length === 0 ? (
           <KeadaanKosong>Belum ada data buku.</KeadaanKosong>
         ) : (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="tanpa-scrollbar -mx-4 flex snap-x scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-6 md:overflow-visible md:px-0">
             {bukuBaru.map((b) => (
-              <Link key={b.id_buku} to={`/anggota/buku/${b.id_buku}`} className="block active:opacity-70">
-                <SampulBuku sampul={b.sampul} judul={b.judul} className="aspect-[2/3] w-full text-2xl" />
-                <div className="mt-1 line-clamp-2 text-center text-xs italic text-slate-700">{b.judul}</div>
+              <Link key={b.id_buku} to={`/anggota/buku/${b.id_buku}`} className="block w-32 shrink-0 snap-start active:opacity-80 md:w-auto">
+                <SampulBuku sampul={b.sampul} judul={b.judul} ukuran="sedang" className="aspect-[2/3] w-full" />
+                <div className="mt-2 line-clamp-2 text-sm font-medium leading-snug text-utama-900">{b.judul}</div>
+                <div className="truncate text-xs text-slate-500">{b.pengarang ?? '-'}</div>
               </Link>
             ))}
           </div>

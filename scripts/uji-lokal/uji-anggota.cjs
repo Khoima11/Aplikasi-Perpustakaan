@@ -74,7 +74,7 @@ const lencana = (s) => (s > 0 ? 'Terlambat ' + s + ' hari' : s === 0 ? 'Jatuh te
     await page.waitForSelector('text=Buku Baru'); await page.waitForFunction(() => !document.body.innerText.includes('Memuat...'));
     const teks = await page.innerText('main');
     cek(L + 'Beranda menyapa dengan nama anggota', teks.includes('Halo, ' + profil.nama));
-    const kartu = page.locator('section:has(h2:text-is("Pinjaman Aktif")) a');
+    const kartu = page.locator('section:has(h2:text-is("Pinjaman Aktif")) a[href^="/anggota/buku/"]');
     cek(L + 'Beranda: jumlah kartu pinjaman aktif = data (' + aktif.length + ')', await kartu.count() === aktif.length, await kartu.count());
     cek(L + 'Beranda: tiap pinjaman aktif menampilkan judul, jatuh tempo, dan penanda yang benar',
       aktif.every((p) => teks.includes(p.judul) && teks.includes('Jatuh tempo: ' + tgl(p.tanggal_jatuh_tempo)) && teks.includes(lencana(p.hari_lewat_jatuh_tempo))), teks.slice(0, 500));
@@ -93,7 +93,7 @@ const lencana = (s) => (s > 0 ? 'Terlambat ' + s + ' hari' : s === 0 ? 'Jatuh te
     if (nomor === '240002') await page.screenshot({ path: path.join(dir, 't6-beranda.png'), fullPage: true });
     if (nomor === '240003') await page.screenshot({ path: path.join(dir, 't6-beranda-terlambat.png'), fullPage: true });
 
-    await page.click('nav >> text=Pinjaman'); await page.waitForSelector('h1:text-is("Pinjaman Saya")'); await page.waitForFunction(() => !document.body.innerText.includes('Memuat...'));
+    await page.click('nav[aria-label="Menu bawah"] >> text=Pinjaman'); await page.waitForSelector('h1:text-is("Pinjaman Saya")'); await page.waitForFunction(() => !document.body.innerText.includes('Memuat...'));
     let t2 = await page.innerText('main');
     cek(L + 'Pinjaman Saya (Aktif): jumlah dan tanggal pinjam sesuai data', await page.locator('[role=tabpanel] a').count() === aktif.length && aktif.every((p) => t2.includes('Pinjam: ' + tgl(new Date(new Date(p.tanggal_pinjam).getTime() + 7 * 3600e3).toISOString()))), t2.slice(0, 400));
     await page.click('[role=tab]:has-text("Riwayat")');
@@ -116,8 +116,8 @@ const lencana = (s) => (s > 0 ? 'Terlambat ' + s + ' hari' : s === 0 ? 'Jatuh te
   const baru = (await api(token, 'v_ketersediaan_buku', { select: 'judul,sampul', order: 'tanggal_input.desc', limit: '6' })).data;
 
   await page.waitForSelector('text=Buku Baru'); await page.waitForFunction(() => !document.body.innerText.includes('Memuat...'));
-  const judulBaru = await page.locator('section:has(h2:text-is("Buku Baru")) a').allInnerTexts();
-  cek('Beranda: 6 buku baru, urutan terbaru dulu', judulBaru.length === 6 && judulBaru.every((j, i) => j.trim().split('\n').pop() === baru[i].judul), judulBaru);
+  const judulBaru = await page.locator('section:has(h2:text-is("Buku Baru")) a[href^="/anggota/buku/"]').allInnerTexts();
+  cek('Beranda: 6 buku baru, urutan terbaru dulu', judulBaru.length === 6 && judulBaru.every((j, i) => j.includes(baru[i].judul)), judulBaru);
   if (baru.some((x) => x.sampul)) {
     const gambar = page.locator('section:has(h2:text-is("Buku Baru")) img').first();
     await gambar.waitFor(); await page.waitForFunction((el) => el.complete, await gambar.elementHandle());
@@ -174,14 +174,14 @@ const lencana = (s) => (s > 0 ? 'Terlambat ' + s + ' hari' : s === 0 ? 'Jatuh te
   cek('Detail: buku yang tidak ada -> pesan jelas', true);
 
   // ---- navigasi bawah & ukuran sentuh ----
-  const tinggi = await page.locator('nav a').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
+  const tinggi = await page.locator('nav[aria-label="Menu bawah"] a').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
   cek('Navigasi bawah: 4 menu, tinggi sentuh >= 44px', tinggi.length === 4 && tinggi.every((t) => t >= 44), tinggi);
   await page.goto(B + '/anggota/katalog'); await page.waitForSelector('[aria-label="Saring kategori"] button');
   const tinggiChip = await page.locator('[aria-label="Saring kategori"] button').evaluateAll((els) => Math.min(...els.map((e) => e.getBoundingClientRect().height)));
   cek('Katalog: tombol kategori tinggi sentuh >= 44px', tinggiChip >= 44, tinggiChip);
   cek('Halaman tidak melebar melebihi layar HP (tanpa gulir samping)', await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
   for (const [menu, url] of [['Beranda', '/anggota'], ['Katalog', '/anggota/katalog'], ['Pinjaman', '/anggota/pinjaman'], ['Profil', '/anggota/profil']]) {
-    await page.click('nav >> text=' + menu); await page.waitForURL('**' + url);
+    await page.click('nav[aria-label="Menu bawah"] >> text=' + menu); await page.waitForURL('**' + url);
   }
   cek('Navigasi bawah berpindah ke keempat halaman', true);
   await page.goto(B + '/petugas/peminjaman'); await page.waitForURL('**/anggota');

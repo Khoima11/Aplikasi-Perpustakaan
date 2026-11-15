@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { atauMengandung } from '../../lib/cari'
 import { pesanGalat } from '../../lib/galat'
+import { SampulBuku } from '../../components/anggota'
 import { BarisInfo, JudulHalaman, Lencana, Paginasi, Pemberitahuan, kelas, type Pesan } from '../../components/ui'
 
 interface BarisBuku {
@@ -11,6 +12,7 @@ interface BarisBuku {
   pengarang: string | null
   nama_kategori: string
   lokasi_rak: string | null
+  sampul: string | null
   total_eksemplar: number
   tersedia: number
   dapat_dipinjam: boolean
@@ -43,7 +45,7 @@ export default function DataBuku() {
     ;(async () => {
       let q = supabase
         .from('v_ketersediaan_buku')
-        .select('id_buku, judul, pengarang, nama_kategori, lokasi_rak, total_eksemplar, tersedia, dapat_dipinjam', {
+        .select('id_buku, judul, pengarang, nama_kategori, lokasi_rak, sampul, total_eksemplar, tersedia, dapat_dipinjam', {
           count: 'exact',
         })
       if (saringan.kata.trim()) q = q.or(atauMengandung(['judul', 'pengarang', 'isbn'], saringan.kata))
@@ -105,7 +107,7 @@ export default function DataBuku() {
       <section className={`${kelas.kartu} mt-3 p-4`}>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-200 bg-slate-50">
+            <thead className="border-b border-utama-100 bg-utama-50/70">
               <tr>
                 <th className={kelas.th}>No.</th>
                 <th className={kelas.th}>Judul</th>
@@ -117,7 +119,7 @@ export default function DataBuku() {
                 <th className={kelas.th}>Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-utama-100/70">
               {memuat ? (
                 <BarisInfo kolom={8}>Memuat data...</BarisInfo>
               ) : baris.length === 0 ? (
@@ -128,7 +130,12 @@ export default function DataBuku() {
                 baris.map((b, i) => (
                   <tr key={b.id_buku}>
                     <td className={kelas.td}>{(halaman - 1) * PER_HALAMAN + i + 1}</td>
-                    <td className={`${kelas.td} font-medium`}>{b.judul}</td>
+                    <td className={kelas.td}>
+                      <div className="flex items-center gap-3">
+                        <SampulBuku sampul={b.sampul} judul={b.judul} className="h-12 w-8" />
+                        <span className="font-medium text-utama-900">{b.judul}</span>
+                      </div>
+                    </td>
                     <td className={kelas.td}>{b.pengarang || '-'}</td>
                     <td className={kelas.td}>{b.nama_kategori}</td>
                     <td className={kelas.td}>{b.lokasi_rak || '-'}</td>

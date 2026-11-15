@@ -5,7 +5,7 @@ import { useAuth } from '../auth/KonteksAuth'
 
 const PANJANG_MIN = 6
 const kelasInput =
-  'mt-1 h-12 w-full rounded-lg border border-slate-300 px-3 outline-none focus:border-utama-600 focus:ring-2 focus:ring-utama-100'
+  'mt-1.5 h-12 w-full rounded-xl border border-utama-100 bg-white px-4 outline-none transition focus:border-utama-400 focus:ring-4 focus:ring-utama-100'
 
 interface Props {
   /** true = minta kata sandi lama dulu (dipakai di halaman profil) */
@@ -97,11 +97,11 @@ export default function FormGantiSandi({ mintaSandiLama = false, labelTombol = '
         Tampilkan kata sandi
       </label>
 
-      {galat && <p role="alert" className="mt-2 rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-800">{galat}</p>}
-      {sukses && <p role="status" className="mt-2 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-800">{sukses}</p>}
+      {galat && <p role="alert" className="mt-2 rounded-xl bg-orange-50 px-3 py-2 text-sm text-orange-800">{galat}</p>}
+      {sukses && <p role="status" className="mt-2 rounded-xl bg-green-50 px-3 py-2 text-sm text-green-800">{sukses}</p>}
 
       <button type="submit" disabled={sibuk}
-        className="mt-4 h-12 w-full rounded-lg bg-utama-700 font-semibold text-white hover:bg-utama-800 disabled:opacity-60">
+        className="mt-4 h-12 w-full rounded-full bg-utama-600 font-semibold text-white shadow-sm transition hover:bg-utama-700 disabled:opacity-60">
         {sibuk ? 'Menyimpan...' : labelTombol}
       </button>
     </form>

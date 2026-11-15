@@ -3,8 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { atauMengandung } from '../../lib/cari'
 import { pesanGalat } from '../../lib/galat'
-import { KOLOM_KATALOG, KeadaanKosong, SampulBuku, ketersediaan, type BukuKatalog } from '../../components/anggota'
-import { Lencana } from '../../components/ui'
+import { KOLOM_KATALOG, KeadaanKosong, KolomCari, SampulBuku, ketersediaan, type BukuKatalog } from '../../components/anggota'
+import { Lencana, kelas } from '../../components/ui'
 
 const PER_MUAT = 20
 
@@ -75,29 +75,19 @@ export default function Katalog() {
     setParameter(p, { replace: true })
   }
 
-  const kelasChip = (aktif: boolean) =>
-    `min-h-11 shrink-0 rounded-full border px-4 text-sm ${aktif ? 'border-utama-700 bg-utama-700 font-medium text-white' : 'border-slate-300 bg-white text-slate-700'}`
-
   return (
     <div>
-      <form role="search" onSubmit={(e) => e.preventDefault()}>
-        <input
-          type="search"
-          enterKeyHint="search"
-          className="h-12 w-full rounded-xl border border-slate-300 px-4 outline-none focus:border-utama-600 focus:ring-2 focus:ring-utama-100"
-          placeholder="Cari judul atau pengarang..."
-          value={ketikan}
-          onChange={(e) => setKetikan(e.target.value)}
-          aria-label="Cari buku"
-        />
+      <h1 className="mb-3 text-xl font-semibold text-utama-900 md:text-2xl">Katalog Buku</h1>
+      <form role="search" onSubmit={(e) => e.preventDefault()} className="md:max-w-xl">
+        <KolomCari placeholder="Cari judul atau pengarang..." value={ketikan} onChange={(e) => setKetikan(e.target.value)} aria-label="Cari buku" />
       </form>
 
-      <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1" role="group" aria-label="Saring kategori">
-        <button className={kelasChip(!kategori)} onClick={() => pilihKategori('')} aria-pressed={!kategori}>Semua</button>
+      <div className={`mt-4 ${kelas.barisTab}`} role="group" aria-label="Saring kategori">
+        <button className={kelas.tab(!kategori)} onClick={() => pilihKategori('')} aria-pressed={!kategori}>Semua</button>
         {daftarKategori.map((k) => (
           <button
             key={k.id_kategori}
-            className={kelasChip(kategori === String(k.id_kategori))}
+            className={kelas.tab(kategori === String(k.id_kategori))}
             onClick={() => pilihKategori(String(k.id_kategori))}
             aria-pressed={kategori === String(k.id_kategori)}
           >
@@ -106,28 +96,29 @@ export default function Katalog() {
         ))}
       </div>
 
-      {galat && <p role="alert" className="mt-3 rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-900">{galat}</p>}
+      {galat && <p role="alert" className="mt-3 rounded-xl bg-orange-50 px-3 py-2 text-sm text-orange-900">{galat}</p>}
 
-      <p className="mt-3 text-sm text-slate-500" role="status">
+      <p className="mt-4 text-sm text-slate-500" role="status">
         {memuat ? 'Mencari...' : `${total} judul buku`}
       </p>
 
-      <div className="mt-2 space-y-3">
-        {!memuat && buku.length === 0 && (
+      {!memuat && buku.length === 0 && (
+        <div className="mt-2">
           <KeadaanKosong>{kata || kategori ? 'Tidak ada buku yang cocok. Coba kata kunci lain.' : 'Belum ada data buku.'}</KeadaanKosong>
-        )}
+        </div>
+      )}
+
+      <div className="mt-3 grid grid-cols-3 gap-x-3 gap-y-6 sm:grid-cols-4 sm:gap-x-4 md:grid-cols-5 lg:grid-cols-6">
         {buku.map((b) => {
           const k = ketersediaan(b)
           return (
-            <Link key={b.id_buku} to={`/anggota/buku/${b.id_buku}`} className="flex gap-3 rounded-xl border border-slate-200 p-3 active:bg-slate-50">
-              <SampulBuku sampul={b.sampul} judul={b.judul} />
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold leading-snug text-slate-800">{b.judul}</div>
-                <div className="truncate text-sm italic text-slate-500">{b.pengarang ?? '-'}</div>
-                <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-700">
-                  <Lencana warna={k.warna}>{k.teks}</Lencana>
-                  {b.lokasi_rak && <span>Rak {b.lokasi_rak}</span>}
-                </div>
+            <Link key={b.id_buku} to={`/anggota/buku/${b.id_buku}`} className="group flex flex-col active:opacity-80">
+              <SampulBuku sampul={b.sampul} judul={b.judul} ukuran="sedang" className="aspect-[2/3] w-full transition group-hover:-translate-y-0.5" />
+              <div className="mt-2 line-clamp-2 text-[13px] font-semibold leading-snug text-utama-900 sm:text-sm">{b.judul}</div>
+              <div className="truncate text-xs text-slate-500">{b.pengarang ?? '-'}</div>
+              <div className="mt-1.5 flex flex-col items-start gap-1 text-xs text-slate-600">
+                <Lencana warna={k.warna}>{k.teks}</Lencana>
+                {b.lokasi_rak && <span>Rak {b.lokasi_rak}</span>}
               </div>
             </Link>
           )
@@ -135,11 +126,7 @@ export default function Katalog() {
       </div>
 
       {!memuat && buku.length < total && (
-        <button
-          onClick={() => void muatLagi()}
-          disabled={memuatLagi}
-          className="mt-4 h-12 w-full rounded-xl border border-slate-300 font-medium text-slate-700 active:bg-slate-50 disabled:opacity-60"
-        >
+        <button onClick={() => void muatLagi()} disabled={memuatLagi} className={`${kelas.tombol} mt-6 w-full`}>
           {memuatLagi ? 'Memuat...' : `Muat lebih banyak (${total - buku.length} lagi)`}
         </button>
       )}

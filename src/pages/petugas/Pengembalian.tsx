@@ -177,7 +177,7 @@ export default function Pengembalian() {
           <section className={`${kelas.kartu} p-4`}>
             <h2 className="text-lg font-semibold">Data Pinjaman</h2>
             <table className="mt-3 w-full text-sm">
-              <tbody className="divide-y divide-slate-100 border-y border-slate-100">
+              <tbody className="divide-y divide-utama-100/70 border-y border-slate-100">
                 <tr>
                   <th className="w-2/5 py-2 pr-3 text-left font-medium text-slate-500">Anggota</th>
                   <td className="py-2 font-medium">
@@ -222,8 +222,8 @@ export default function Pengembalian() {
                 {(['baik', 'rusak', 'hilang'] as KondisiKembali[]).map((k) => (
                   <label
                     key={k}
-                    className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-4 text-sm ${
-                      kondisi === k ? 'border-utama-600 bg-utama-50 font-medium text-utama-800' : 'border-slate-300'
+                    className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border px-4 text-sm ${
+                      kondisi === k ? 'border-utama-600 bg-utama-50 font-medium text-utama-800' : 'border-utama-200'
                     }`}
                   >
                     <input type="radio" name="kondisi" className="h-4 w-4" checked={kondisi === k} onChange={() => setKondisi(k)} />
@@ -276,7 +276,7 @@ export default function Pengembalian() {
         <p className="text-sm text-slate-500">Buku sudah dikembalikan, tetapi dendanya belum dibayar. Tandai lunas setelah anggota membayar di meja petugas.</p>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-200 bg-slate-50">
+            <thead className="border-b border-utama-100 bg-utama-50/70">
               <tr>
                 <th className={kelas.th}>Anggota</th>
                 <th className={kelas.th}>Kelas</th>
@@ -287,7 +287,7 @@ export default function Pengembalian() {
                 <th className={kelas.th}>Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-utama-100/70">
               {tunggakan.length === 0 ? (
                 <BarisInfo kolom={7}>Tidak ada denda yang belum lunas.</BarisInfo>
               ) : (

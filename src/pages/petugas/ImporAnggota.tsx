@@ -81,7 +81,7 @@ export default function ImporAnggota({ onTutup, onSelesai }: { onTutup: () => vo
   return (
     <Modal judul="Impor Anggota dari Excel" onTutup={sibuk ? () => undefined : onTutup} lebar="max-w-3xl">
       <div className="space-y-4">
-        <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+        <div className="rounded-xl bg-utama-50 p-3 text-sm text-slate-700">
           <p className="font-medium">Cara impor</p>
           <ol className="mt-1 list-decimal space-y-0.5 pl-5">
             <li>Unduh template, lalu isi satu anggota per baris mulai baris ke-2.</li>
@@ -93,7 +93,7 @@ export default function ImporAnggota({ onTutup, onSelesai }: { onTutup: () => vo
               <thead>
                 <tr>
                   {KOLOM_IMPOR.map((k) => (
-                    <th key={k.kunci} className="border border-slate-300 bg-white px-2 py-1 text-left font-semibold">
+                    <th key={k.kunci} className="border border-utama-200 bg-white px-2 py-1 text-left font-semibold">
                       {k.judul}{k.wajib && <span className="text-orange-600"> *</span>}
                     </th>
                   ))}
@@ -103,7 +103,7 @@ export default function ImporAnggota({ onTutup, onSelesai }: { onTutup: () => vo
                 {[0, 1].map((i) => (
                   <tr key={i}>
                     {KOLOM_IMPOR.map((k) => (
-                      <td key={k.kunci} className="border border-slate-300 bg-white px-2 py-1">{k.contoh[i] || <span className="text-slate-400">(kosong)</span>}</td>
+                      <td key={k.kunci} className="border border-utama-200 bg-white px-2 py-1">{k.contoh[i] || <span className="text-slate-400">(kosong)</span>}</td>
                     ))}
                   </tr>
                 ))}
@@ -141,9 +141,9 @@ export default function ImporAnggota({ onTutup, onSelesai }: { onTutup: () => vo
               <Lencana warna="hijau">{sah.length} baris siap diimpor</Lencana>
               {bermasalah.length > 0 && <Lencana warna="oranye">{bermasalah.length} baris bermasalah (dilewati)</Lencana>}
             </div>
-            <div className="mt-2 max-h-64 overflow-auto rounded-lg border border-slate-200">
+            <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-utama-100">
               <table className="w-full">
-                <thead className="sticky top-0 bg-slate-50">
+                <thead className="sticky top-0 bg-utama-50">
                   <tr>
                     <th className={kelas.th}>Baris</th>
                     <th className={kelas.th}>Nomor Induk</th>
@@ -153,7 +153,7 @@ export default function ImporAnggota({ onTutup, onSelesai }: { onTutup: () => vo
                     <th className={kelas.th}>Keterangan</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-utama-100/70">
                   {baris.map((b) => (
                     <tr key={b.baris} className={b.galat ? 'bg-orange-50' : ''}>
                       <td className={kelas.td}>{b.baris}</td>
@@ -183,16 +183,16 @@ export default function ImporAnggota({ onTutup, onSelesai }: { onTutup: () => vo
               {bermasalah.length > 0 && <Lencana warna="abu">{bermasalah.length} dilewati saat pemeriksaan</Lencana>}
             </div>
             {hasil.gagal.length > 0 && (
-              <div className="mt-2 max-h-56 overflow-auto rounded-lg border border-slate-200">
+              <div className="mt-2 max-h-56 overflow-auto rounded-xl border border-utama-100">
                 <table className="w-full">
-                  <thead className="sticky top-0 bg-slate-50">
+                  <thead className="sticky top-0 bg-utama-50">
                     <tr>
                       <th className={kelas.th}>Baris</th>
                       <th className={kelas.th}>Nomor Induk</th>
                       <th className={kelas.th}>Alasan gagal</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-utama-100/70">
                     {hasil.gagal.map((g) => (
                       <tr key={`${g.baris}-${g.nomor_induk}`}>
                         <td className={kelas.td}>{g.baris}</td>

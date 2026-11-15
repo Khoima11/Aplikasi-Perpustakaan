@@ -102,7 +102,7 @@ src/
   lib/                      supabase client, tanggal WIB, format rupiah, galat (terjemahan error DB), cari (filter aman), sampul, akun (Edge Function), imporAnggota (format kolom Excel), sirkulasi (pemanggil fungsi transaksi), laporan (penyusun isi 4 laporan), ambilSemua (ambil data berhalaman)
   auth/                     KonteksAuth (sesi+profil, masuk/keluar), Penjaga (WajibLogin, HanyaTamu, ArahkanAwal)
   layouts/                  LayoutPetugas (sidebar), LayoutAnggota (navigasi bawah)
-  components/               komponen UI bersama (`ui.tsx`: kelas tombol/input, Lencana, Modal, Konfirmasi, Pemberitahuan, Paginasi; `anggota.tsx`: SampulBuku, kartu pinjaman, penanda jatuh tempo/ketersediaan)
+  components/               komponen UI bersama (`ui.tsx`: kelas tombol/input/tab, Lencana, Modal, Konfirmasi, Pemberitahuan, Paginasi; `anggota.tsx`: SampulBuku, kartu pinjaman, KolomCari, JudulBagian, penanda jatuh tempo/ketersediaan; `IlustrasiBuku.tsx`: gambar login)
   pages/petugas/            halaman petugas
   pages/anggota/            halaman anggota
   pages/                    Login, GantiKataSandi
@@ -126,7 +126,7 @@ README.md                   panduan utama: setup Supabase, menjalankan lokal, de
 - `npm run build` wajib sukses di setiap tahap.
 - Perubahan struktur database selalu lewat **file migrasi baru** (jangan ubah migrasi yang sudah dijalankan).
 - Catat setiap revisi dari sekolah di bagian Log Keputusan di bawah.
-- Desain: bersih & sederhana; biru-putih (utama), hijau = tersedia, oranye = peringatan/terlambat; tombol nyaman disentuh (min. tinggi 44px).
+- Desain (diubah pemilik 15/11/2026, mengikuti gambar referensi): cokelat karamel (utama) di atas latar krem, kartu putih bersudut bulat dengan bayangan lembut, tombol & tab berbentuk pil, huruf Poppins; hijau = tersedia, merah bata (kelas `orange-*` yang warnanya ditimpa di tema) = peringatan/terlambat; tombol nyaman disentuh (min. tinggi 44px). Satu gaya untuk petugas & anggota; tata letak menyesuaikan layar.
 
 ## 8. Log keputusan
 - Tahap 0: ID petugas pola `PTG001`; kata sandi awal = NIS/NIP/ID dan wajib ganti; format impor Excel seperti bagian 4.
@@ -201,3 +201,13 @@ README.md                   panduan utama: setup Supabase, menjalankan lokal, de
   - README.md ditulis (setup Supabase, lokal, deploy Vercel langkah demi langkah, pasang di HP, pemakaian, pembaruan, masalah umum, keamanan).
   - Deploy ke Vercel dilakukan PEMILIK lewat dashboard Vercel (sesi ini tidak punya akses Vercel/GitHub). Menunggu konfirmasi pemilik sebelum memandu deploy.
   - Masih menunggu jawaban pemilik: nama sekolah (`VITE_NAMA_SEKOLAH`), aturan perpanjangan (A/B/biarkan), dan apakah data contoh tetap dipakai saat uji coba online.
+- Desain ulang tampilan (setelah Tahap 8, sebelum deploy), 15/11/2026:
+  - **Keputusan pemilik:** tampilan mengikuti gambar referensi aplikasi buku (cokelat karamel, tidak flat) dan "disamakan untuk semua device" = satu gaya untuk petugas & anggota, tata letak menyesuaikan layar. Pemilik memilih warna cokelat karamel (mengganti biru-putih dokumen awal).
+  - Yang diambil dari referensi HANYA gaya visual. Fitur di referensi yang di luar dokumen TIDAK dibuat: rating/ulasan, beli, audio/baca bab, ikuti penulis, notifikasi, daftar mandiri, login Google/Facebook, "You May Like This".
+  - Tema di `src/index.css`: `utama-50..900` = cokelat karamel; `krem` = latar; palet `orange-*` DITIMPA menjadi merah bata (agar tanda terlambat tetap menonjol di antara cokelat, tanpa mengubah kelas di halaman); `slate-500` digelapkan (kontras 5,46 di atas krem). Semua pasangan teks/latar utama >= 4,5.
+  - Huruf Poppins dari Google Fonts (`index.html`), di-cache oleh service worker PWA.
+  - Tata letak: petugas — menu samping (`nav[aria-label="Menu samping"]`) di layar >= lg; di HP/tablet menu bawah 4 item + tombol "Menu" yang membuka lembar semua menu. Anggota — menu atas (`Menu atas`) dan konten melebar max-w-6xl di layar >= md; di HP menu bawah (`Menu bawah`).
+  - Halaman login dua panel (ilustrasi vektor buatan sendiri + formulir); Beranda anggota dengan spanduk sapaan, kotak peringatan, deretan buku baru yang bisa digeser; Katalog berupa kisi sampul (3 kolom HP s.d. 6 kolom komputer); Detail buku dua kolom di komputer; Profil dengan avatar inisial.
+  - Sampul pengganti (buku tanpa gambar): gradasi warna tetap per judul + punggung buku + judul tertulis. Tidak memakai warna merah agar tidak tertukar dengan tanda terlambat.
+  - Ikon PWA dan `theme_color` diganti cokelat.
+  - Uji browser disesuaikan dengan menu bernama (`nav[aria-label=...]`); hasil: database 79, sirkulasi 50, dashboard+laporan 36, login 23, anggota 71, data master 54 = 313 lulus. Tidak ada perubahan database/Edge Function.

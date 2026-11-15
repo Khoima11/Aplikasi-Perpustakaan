@@ -3,21 +3,27 @@ import { useEffect, type ReactNode } from 'react'
 
 export const kelas = {
   input:
-    'h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm outline-none focus:border-utama-600 focus:ring-2 focus:ring-utama-100 disabled:bg-slate-100 disabled:text-slate-500',
+    'h-11 w-full rounded-xl border border-utama-100 bg-white px-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-utama-400 focus:ring-4 focus:ring-utama-100 disabled:bg-utama-50 disabled:text-slate-500',
   area:
-    'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-utama-600 focus:ring-2 focus:ring-utama-100',
-  label: 'mb-1 block text-sm font-medium text-slate-700',
+    'w-full rounded-xl border border-utama-100 bg-white px-3.5 py-2.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-utama-400 focus:ring-4 focus:ring-utama-100',
+  label: 'mb-1.5 block text-sm font-medium text-slate-700',
   tombolUtama:
-    'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-utama-700 px-4 text-sm font-semibold text-white hover:bg-utama-800 disabled:opacity-60',
+    'inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-utama-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-utama-700 active:scale-[0.98] disabled:opacity-60',
   tombol:
-    'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60',
+    'inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-utama-200 bg-white px-5 text-sm font-medium text-utama-800 transition hover:bg-utama-50 active:scale-[0.98] disabled:opacity-60',
   tombolBahaya:
-    'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-orange-600 px-4 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-60',
+    'inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-orange-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-700 active:scale-[0.98] disabled:opacity-60',
   tombolKecil:
-    'inline-flex min-h-9 items-center justify-center rounded-md border border-slate-300 bg-white px-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50',
-  kartu: 'rounded-xl border border-slate-200 bg-white',
-  th: 'whitespace-nowrap px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-600',
-  td: 'px-3 py-2.5 align-middle text-sm',
+    'inline-flex min-h-9 items-center justify-center whitespace-nowrap rounded-full border border-utama-200 bg-white px-3 text-xs font-medium text-utama-800 transition hover:bg-utama-50 disabled:cursor-not-allowed disabled:opacity-50',
+  kartu: 'rounded-2xl border border-utama-100/70 bg-white shadow-kartu',
+  th: 'whitespace-nowrap px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-utama-800',
+  td: 'px-3 py-3 align-middle text-sm',
+  /** tab berbentuk pil (dipakai Data Anggota, Laporan, Pinjaman Saya) */
+  tab: (aktif: boolean) =>
+    `min-h-11 shrink-0 whitespace-nowrap rounded-full px-5 text-sm font-medium transition ${
+      aktif ? 'bg-utama-600 text-white shadow-sm' : 'bg-white text-slate-600 ring-1 ring-utama-100 hover:bg-utama-50'
+    }`,
+  barisTab: 'tanpa-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1',
 }
 
 export type WarnaLencana = 'hijau' | 'oranye' | 'biru' | 'abu' | 'merah'
@@ -51,7 +57,7 @@ export function Pemberitahuan({ pesan, onTutup }: { pesan: Pesan | null; onTutup
         ? 'border-orange-200 bg-orange-50 text-orange-900'
         : 'border-utama-100 bg-utama-50 text-utama-800'
   return (
-    <div role={pesan.jenis === 'galat' ? 'alert' : 'status'} className={`flex items-start gap-3 rounded-lg border px-3 py-2 text-sm ${gaya}`}>
+    <div role={pesan.jenis === 'galat' ? 'alert' : 'status'} className={`flex items-start gap-3 rounded-xl border px-3 py-2 text-sm ${gaya}`}>
       <span className="flex-1 whitespace-pre-line">{pesan.teks}</span>
       {onTutup && (
         <button onClick={onTutup} aria-label="Tutup pesan" className="-mr-1 rounded px-1.5 text-base leading-none opacity-70 hover:opacity-100">
@@ -63,9 +69,10 @@ export function Pemberitahuan({ pesan, onTutup }: { pesan: Pesan | null; onTutup
 }
 
 export function KartuRingkas({ label, nilai, warna }: { label: string; nilai: ReactNode; warna?: 'oranye' | 'hijau' }) {
-  const warnaNilai = warna === 'oranye' ? 'text-orange-600' : warna === 'hijau' ? 'text-green-700' : 'text-slate-800'
+  const warnaNilai = warna === 'oranye' ? 'text-orange-600' : warna === 'hijau' ? 'text-green-700' : 'text-utama-900'
   return (
-    <div className={`${kelas.kartu} p-4 text-center print:p-2`}>
+    <div className={`${kelas.kartu} relative overflow-hidden p-4 text-center print:p-2 print:shadow-none`}>
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-utama-400 print:hidden" />
       <div className="text-sm text-slate-500 print:text-xs">{label}</div>
       <div className={`mt-1 text-3xl font-bold print:mt-0 print:text-xl ${warnaNilai}`}>{nilai}</div>
     </div>
@@ -90,11 +97,11 @@ export function Modal({
   }, [onTutup])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label={judul}>
-      <div className={`w-full ${lebar} rounded-xl bg-white shadow-xl`}>
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-utama-900/40 p-4 backdrop-blur-[2px] sm:items-center" role="dialog" aria-modal="true" aria-label={judul}>
+      <div className={`w-full ${lebar} rounded-2xl bg-white shadow-2xl`}>
+        <div className="flex items-center justify-between border-b border-utama-100 px-5 py-3.5">
           <h2 className="text-lg font-semibold text-slate-800">{judul}</h2>
-          <button onClick={onTutup} aria-label="Tutup" className="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-slate-500 hover:bg-slate-100">
+          <button onClick={onTutup} aria-label="Tutup" className="flex h-10 w-10 items-center justify-center rounded-full text-xl text-slate-500 hover:bg-utama-50">
             ×
           </button>
         </div>
@@ -157,7 +164,7 @@ export function BarisInfo({ kolom, children }: { kolom: number; children: ReactN
 export function JudulHalaman({ children, aksi }: { children: ReactNode; aksi?: ReactNode }) {
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-2xl font-semibold text-slate-800">{children}</h1>
+      <h1 className="text-2xl font-semibold text-utama-900">{children}</h1>
       {aksi}
     </div>
   )

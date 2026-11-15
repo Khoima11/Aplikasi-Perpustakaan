@@ -330,7 +330,7 @@ export default function DetailBuku() {
           <form onSubmit={simpanBuku} className="mt-3 space-y-3">
             <div className="flex gap-4">
               <div className="w-28 shrink-0">
-                <div className="flex aspect-[2/3] items-center justify-center overflow-hidden rounded-lg border border-slate-300 bg-slate-100 text-center text-xs text-slate-400">
+                <div className="flex aspect-[2/3] items-center justify-center overflow-hidden rounded-xl border border-utama-200 bg-utama-50 text-center text-xs text-slate-400">
                   {gambar ? <img src={gambar} alt="Sampul buku" className="h-full w-full object-cover" /> : 'Belum ada sampul'}
                 </div>
                 <label className={`${kelas.tombolKecil} mt-2 w-full cursor-pointer`}>
@@ -443,7 +443,7 @@ export default function DetailBuku() {
               </button>
               <div className="mt-3 overflow-x-auto">
                 <table className="w-full">
-                  <thead className="border-b border-slate-200 bg-slate-50">
+                  <thead className="border-b border-utama-100 bg-utama-50/70">
                     <tr>
                       <th className={kelas.th}>No. Induk</th>
                       <th className={kelas.th}>Sumber</th>
@@ -452,7 +452,7 @@ export default function DetailBuku() {
                       <th className={kelas.th}>Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-utama-100/70">
                     {eksemplar.length === 0 ? (
                       <BarisInfo kolom={5}>Belum ada eksemplar untuk buku ini.</BarisInfo>
                     ) : (
@@ -585,7 +585,7 @@ export default function DetailBuku() {
           <fieldset className="space-y-2">
             <legend className="sr-only">Status eksemplar</legend>
             {(['tersedia', 'rusak', 'hilang'] as StatusEksemplar[]).map((s) => (
-              <label key={s} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-slate-200 px-3">
+              <label key={s} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-utama-100 px-3">
                 <input
                   type="radio"
                   name="status-eks"

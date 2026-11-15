@@ -114,10 +114,11 @@ export default function Dashboard() {
         <KartuRingkas label="Peminjaman Hari Ini" nilai={angka(data?.pinjamHariIni)} />
         <KartuRingkas label="Pengembalian Hari Ini" nilai={angka(data?.kembaliHariIni)} />
         <KartuRingkas label="Jatuh Tempo Hari Ini" nilai={angka(data?.jatuhTempo.length)} warna={data && data.jatuhTempo.length > 0 ? 'oranye' : undefined} />
-        <div className={`${kelas.kartu} p-4 text-center`}>
+        <div className={`${kelas.kartu} relative overflow-hidden p-4 text-center`}>
+          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-orange-400" />
           <div className="text-sm text-slate-500">Pinjaman Terlambat</div>
           <div className={`mt-1 text-3xl font-bold ${data && data.terlambat > 0 ? 'text-orange-600' : 'text-slate-800'}`}>{angka(data?.terlambat)}</div>
-          <Link to="/petugas/keterlambatan" className="mt-1 inline-flex min-h-9 items-center rounded-md border border-slate-300 px-3 text-xs font-medium text-slate-700 hover:bg-slate-50">
+          <Link to="/petugas/keterlambatan" className="mt-1 inline-flex min-h-9 items-center rounded-full border border-utama-200 px-3 text-xs font-medium text-slate-700 hover:bg-utama-50">
             Lihat daftar
           </Link>
         </div>
@@ -132,7 +133,7 @@ export default function Dashboard() {
       <div className="mt-4 grid gap-4 xl:grid-cols-[3fr_2fr]">
         <section className={`${kelas.kartu} p-4`}>
           <h2 className="text-lg font-semibold">Grafik Peminjaman 7 Hari Terakhir</h2>
-          <div className="mt-4 flex h-48 items-end gap-2 border-b border-l border-slate-300 px-2" role="img"
+          <div className="mt-4 flex h-48 items-end gap-2 border-b border-l border-utama-200 px-2" role="img"
             aria-label={`Jumlah buku dipinjam per hari: ${data?.grafik.map((g) => `${formatTanggal(g.tanggal)} ${g.jumlah}`).join(', ') ?? 'memuat'}`}>
             {(data?.grafik ?? []).map((g) => (
               <div key={g.tanggal} className="flex h-full flex-1 flex-col items-center justify-end">
@@ -154,13 +155,13 @@ export default function Dashboard() {
         <section className={`${kelas.kartu} p-4`}>
           <h2 className="text-lg font-semibold">Ringkasan Koleksi</h2>
           <table className="mt-3 w-full">
-            <thead className="border-b border-slate-200 bg-slate-50">
+            <thead className="border-b border-utama-100 bg-utama-50/70">
               <tr>
                 <th className={kelas.th}>Keterangan</th>
                 <th className={`${kelas.th} text-right`}>Jumlah</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-utama-100/70">
               {(data?.koleksi ?? []).map((k) => (
                 <tr key={k.label}>
                   <td className={kelas.td}>{k.label}</td>
@@ -177,7 +178,7 @@ export default function Dashboard() {
         <h2 className="text-lg font-semibold">Jatuh Tempo Hari Ini</h2>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-200 bg-slate-50">
+            <thead className="border-b border-utama-100 bg-utama-50/70">
               <tr>
                 <th className={kelas.th}>No.</th>
                 <th className={kelas.th}>Nama Anggota</th>
@@ -187,7 +188,7 @@ export default function Dashboard() {
                 <th className={kelas.th}>Jatuh Tempo</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-utama-100/70">
               {!data ? (
                 <BarisInfo kolom={6}>Memuat data...</BarisInfo>
               ) : data.jatuhTempo.length === 0 ? (

@@ -114,7 +114,7 @@ export default function Keterlambatan() {
       <section className={`${kelas.kartu} mt-3 p-4`}>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-200 bg-slate-50">
+            <thead className="border-b border-utama-100 bg-utama-50/70">
               <tr>
                 <th className={kelas.th}>No.</th>
                 <th className={kelas.th}>Nama Anggota</th>
@@ -126,7 +126,7 @@ export default function Keterlambatan() {
                 <th className={kelas.th}>Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-utama-100/70">
               {memuat ? (
                 <BarisInfo kolom={8}>Memuat data...</BarisInfo>
               ) : tampil.length === 0 ? (

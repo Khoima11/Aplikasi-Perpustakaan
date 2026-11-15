@@ -72,7 +72,7 @@ export default function BuktiPeminjaman() {
         )}
       </div>
 
-      <div className="mx-auto max-w-xl rounded-xl border border-slate-300 bg-white p-6 print:max-w-none print:rounded-none print:border-0 print:p-0">
+      <div className="mx-auto max-w-xl rounded-2xl border border-utama-100 bg-white p-6 shadow-kartu print:shadow-none print:max-w-none print:rounded-none print:border-0 print:p-0">
         <div className="border-b border-slate-300 pb-3 text-center">
           <div className="text-lg font-bold uppercase tracking-wide">Perpustakaan {NAMA_SEKOLAH}</div>
           <div className="text-sm italic text-slate-600">Bukti Peminjaman Buku</div>

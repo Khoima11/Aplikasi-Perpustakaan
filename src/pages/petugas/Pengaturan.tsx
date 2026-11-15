@@ -107,7 +107,7 @@ export default function Pengaturan() {
       <section className={`${kelas.kartu} p-4`}>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-200 bg-slate-50">
+            <thead className="border-b border-utama-100 bg-utama-50/70">
               <tr>
                 <th className={kelas.th}>Jenis Anggota</th>
                 <th className={kelas.th}>Maks. Buku Dipinjam</th>
@@ -117,7 +117,7 @@ export default function Pengaturan() {
                 <th className={kelas.th}>Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-utama-100/70">
               {memuat ? (
                 <BarisInfo kolom={6}>Memuat data...</BarisInfo>
               ) : (

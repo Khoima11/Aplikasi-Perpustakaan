@@ -73,16 +73,14 @@ export default function Laporan() {
       <div className="no-print">
         <JudulHalaman>Laporan Perpustakaan</JudulHalaman>
 
-        <div className="flex gap-1 overflow-x-auto border-b border-slate-200" role="tablist">
+        <div className={kelas.barisTab} role="tablist">
           {TAB.map((t) => (
             <button
               key={t.kunci}
               role="tab"
               aria-selected={jenis === t.kunci}
               onClick={() => setJenis(t.kunci)}
-              className={`min-h-11 whitespace-nowrap rounded-t-lg px-5 text-sm font-medium ${
-                jenis === t.kunci ? 'border border-b-0 border-slate-200 bg-white text-utama-700' : 'text-slate-600 hover:bg-slate-100'
-              }`}
+              className={kelas.tab(jenis === t.kunci)}
             >
               {t.label}
             </button>
@@ -129,21 +127,21 @@ export default function Laporan() {
               <h2 className="text-lg font-semibold print:text-base">{t.judul ?? 'Hasil Laporan'}</h2>
               <div className="mt-3 overflow-x-auto print:mt-1 print:overflow-visible">
                 <table className="tabel-laporan w-full">
-                  <thead className="border-b border-slate-200 bg-slate-50">
+                  <thead className="border-b border-utama-100 bg-utama-50/70">
                     <tr>
                       {t.kolom.map((k, i) => (
                         <th key={k} className={`${kelas.th} ${t.kanan?.includes(i) ? 'text-right' : ''}`}>{k}</th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-utama-100/70">
                     {t.baris.length === 0 ? (
                       <tr>
                         <td colSpan={t.kolom.length} className="px-3 py-6 text-center text-sm text-slate-500">{t.kosong}</td>
                       </tr>
                     ) : (
                       t.baris.map((b, i) => (
-                        <tr key={i} className={b[0] === 'JUMLAH' ? 'bg-slate-50 font-semibold' : ''}>
+                        <tr key={i} className={b[0] === 'JUMLAH' ? 'bg-utama-50 font-semibold' : ''}>
                           {b.map((sel, j) => (
                             <td key={j} className={`${kelas.td} ${t.kanan?.includes(j) ? 'text-right' : ''}`}>{sel}</td>
                           ))}

@@ -6,7 +6,7 @@ import { berandaUntuk, type Peran } from '../lib/tipe'
 export function LayarMemuat() {
   return (
     <div className="flex min-h-screen items-center justify-center text-slate-500" role="status">
-      <span className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-utama-700" />
+      <span className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-utama-200 border-t-utama-700" />
       Memuat...
     </div>
   )

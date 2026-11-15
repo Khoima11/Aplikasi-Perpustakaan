@@ -220,16 +220,14 @@ export default function DataAnggota() {
     <div>
       <JudulHalaman>Data Anggota</JudulHalaman>
 
-      <div className="flex gap-1 border-b border-slate-200" role="tablist">
+      <div className={kelas.barisTab} role="tablist">
         {tabs.map((t) => (
           <button
             key={t.kunci}
             role="tab"
             aria-selected={tab === t.kunci}
             onClick={() => gantiTab(t.kunci)}
-            className={`min-h-11 rounded-t-lg px-5 text-sm font-medium ${
-              tab === t.kunci ? 'border border-b-0 border-slate-200 bg-white text-utama-700' : 'text-slate-600 hover:bg-slate-100'
-            }`}
+            className={kelas.tab(tab === t.kunci)}
           >
             {t.label}
           </button>
@@ -262,7 +260,7 @@ export default function DataAnggota() {
       <section className={`${kelas.kartu} mt-3 p-4`}>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-200 bg-slate-50">
+            <thead className="border-b border-utama-100 bg-utama-50/70">
               <tr>
                 <th className={kelas.th}>No.</th>
                 <th className={kelas.th}>NIS/NIP</th>
@@ -274,7 +272,7 @@ export default function DataAnggota() {
                 <th className={kelas.th}>Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-utama-100/70">
               {memuat ? (
                 <BarisInfo kolom={8}>Memuat data...</BarisInfo>
               ) : baris.length === 0 ? (

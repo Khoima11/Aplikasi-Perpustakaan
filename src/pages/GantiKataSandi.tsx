@@ -15,16 +15,16 @@ export default function GantiKataSandi() {
   if (!profil.wajib_ganti_password) return <Navigate to={berandaUntuk(profil.role)} replace />
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+    <div className="flex min-h-screen items-center justify-center bg-krem p-4">
+      <div className="w-full max-w-sm rounded-3xl border border-utama-100 bg-white p-6 shadow-kartu sm:p-8">
         <div className="flex items-center gap-3">
           <Logo className="h-10 w-10" />
           <div>
-            <h1 className="text-xl font-bold text-slate-800">Ganti Kata Sandi</h1>
+            <h1 className="text-xl font-bold text-utama-900">Ganti Kata Sandi</h1>
             <p className="text-sm text-slate-500">Halo, {profil.nama}</p>
           </div>
         </div>
-        <p className="mt-4 rounded-lg bg-utama-50 px-3 py-2 text-sm text-utama-800">
+        <p className="mt-4 rounded-xl bg-utama-50 px-3 py-2 text-sm text-utama-800">
           Demi keamanan, kata sandi awal wajib diganti sebelum memakai SIMPUS.
         </p>
         <div className="mt-5">
@@ -35,7 +35,7 @@ export default function GantiKataSandi() {
         </div>
         <button
           onClick={() => void keluar()}
-          className="mt-3 min-h-11 w-full rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+          className="mt-3 min-h-11 w-full rounded-full text-sm text-slate-600 hover:bg-utama-50"
         >
           Batal dan logout
         </button>

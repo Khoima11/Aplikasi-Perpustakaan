@@ -90,7 +90,7 @@ async function anggapSudahGanti(page) {
   cek('anggota -> diarahkan ke /anggota', true);
   await page.goto(B + '/petugas/anggota'); await page.waitForURL('**/anggota');
   cek('anggota membuka halaman petugas -> dikembalikan ke /anggota', page.url().endsWith('/anggota'));
-  await page.goto(B + '/anggota/profil'); await page.waitForSelector('text=Andi Pratama');
+  await page.goto(B + '/anggota/profil'); await page.waitForSelector('main >> text=Andi Pratama');
   cek('profil anggota menampilkan nama, NIS, kelas', (await page.textContent('main')).includes('240001') && (await page.textContent('main')).includes('7A'));
   await page.screenshot({ path: dir + '/t3-profil-anggota.png', fullPage: true });
   await page.click('text=Logout'); await page.waitForURL('**/login');

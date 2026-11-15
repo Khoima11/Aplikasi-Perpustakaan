@@ -1,6 +1,7 @@
 # SIMPUS — Sistem Informasi Perpustakaan Sekolah
 
 Aplikasi web responsif untuk perpustakaan satu sekolah. Bisa dipasang di layar utama HP (PWA).
+Tampilan bernuansa cokelat karamel dengan satu gaya untuk komputer dan HP.
 
 - **Petugas** (tampilan komputer): mengelola kategori, buku, eksemplar, anggota, dan aturan
   peminjaman; mencatat peminjaman, pengembalian, dan perpanjangan; memantau keterlambatan;

@@ -5,7 +5,7 @@ import { formatRupiah } from '../../lib/format'
 import { pesanGalat } from '../../lib/galat'
 import { formatTanggal } from '../../lib/tanggal'
 import { KOLOM_PINJAMAN_SAYA, KartuPinjamanAktif, KeadaanKosong, SampulBuku, type PinjamanSaya as Pinjaman } from '../../components/anggota'
-import { Lencana } from '../../components/ui'
+import { Lencana, kelas } from '../../components/ui'
 
 type Tab = 'aktif' | 'riwayat'
 
@@ -31,16 +31,13 @@ export default function PinjamanSaya() {
     }
   }, [])
 
-  const kelasTab = (t: Tab) =>
-    `min-h-11 rounded-t-lg px-5 text-sm font-medium ${
-      tab === t ? 'border border-b-0 border-slate-200 bg-white text-utama-700' : 'text-slate-600'
-    }`
+  const kelasTab = (t: Tab) => kelas.tab(tab === t)
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-slate-800">Pinjaman Saya</h1>
+      <h1 className="text-xl font-semibold text-utama-900 md:text-2xl">Pinjaman Saya</h1>
 
-      <div className="mt-3 flex gap-1 border-b border-slate-200" role="tablist">
+      <div className={`mt-3 ${kelas.barisTab}`} role="tablist">
         <button role="tab" aria-selected={tab === 'aktif'} className={kelasTab('aktif')} onClick={() => setTab('aktif')}>
           Aktif{aktif ? ` (${aktif.length})` : ''}
         </button>
@@ -49,9 +46,9 @@ export default function PinjamanSaya() {
         </button>
       </div>
 
-      {galat && <p role="alert" className="mt-3 rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-900">{galat}</p>}
+      {galat && <p role="alert" className="mt-3 rounded-xl bg-orange-50 px-3 py-2 text-sm text-orange-900">{galat}</p>}
 
-      <div className="mt-4 space-y-3" role="tabpanel">
+      <div className="mt-4 grid gap-3 md:grid-cols-2" role="tabpanel">
         {tab === 'aktif' &&
           (aktif === null ? (
             <p className="text-sm text-slate-500">Memuat...</p>
@@ -62,7 +59,7 @@ export default function PinjamanSaya() {
               {aktif.map((p) => (
                 <KartuPinjamanAktif key={p.id_detail} p={p} tampilTanggalPinjam />
               ))}
-              <p className="text-xs text-slate-500">Pengembalian dan perpanjangan dilakukan di meja petugas perpustakaan.</p>
+              <p className="text-xs text-slate-500 md:col-span-2">Pengembalian dan perpanjangan dilakukan di meja petugas perpustakaan.</p>
             </>
           ))}
 
@@ -73,11 +70,11 @@ export default function PinjamanSaya() {
             <KeadaanKosong>Belum ada riwayat pinjaman.</KeadaanKosong>
           ) : (
             riwayat.map((p) => (
-              <Link key={p.id_detail} to={`/anggota/buku/${p.id_buku}`} className="flex gap-3 rounded-xl border border-slate-200 p-3 active:bg-slate-50">
-                <SampulBuku sampul={p.sampul} judul={p.judul} />
+              <Link key={p.id_detail} to={`/anggota/buku/${p.id_buku}`} className="flex gap-4 rounded-2xl border border-utama-100/70 bg-white p-3 shadow-kartu transition active:scale-[0.99]">
+                <SampulBuku sampul={p.sampul} judul={p.judul} className="h-28 w-[4.7rem]" />
                 <div className="min-w-0 flex-1 text-sm text-slate-700">
-                  <div className="text-base font-semibold leading-snug text-slate-800">{p.judul}</div>
-                  <div className="truncate italic text-slate-500">{p.pengarang ?? '-'}</div>
+                  <div className="line-clamp-2 text-base font-semibold leading-snug text-utama-900">{p.judul}</div>
+                  <div className="truncate text-slate-500">{p.pengarang ?? '-'}</div>
                   <div className="mt-1">Pinjam: {formatTanggal(p.tanggal_pinjam)}</div>
                   <div>{p.status === 'hilang' ? 'Dicatat hilang' : 'Kembali'}: {formatTanggal(p.tanggal_kembali)}</div>
                   <div className="mt-1 flex flex-wrap gap-1.5">

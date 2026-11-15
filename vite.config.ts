@@ -17,8 +17,8 @@ export default defineConfig({
         lang: 'id',
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#1d4ed8',
+        background_color: '#faf6f0',
+        theme_color: '#875424',
         icons: [
           { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },
@@ -30,6 +30,14 @@ export default defineConfig({
         // agar ketersediaan buku dan jatuh tempo selalu terbaru.
         navigateFallback: '/index.html',
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        // Huruf Poppins dari Google Fonts disimpan di perangkat setelah pertama dimuat
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: { cacheName: 'huruf', expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 } },
+          },
+        ],
       },
     }),
   ],

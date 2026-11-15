@@ -1,16 +1,49 @@
 @import "tailwindcss";
 
 @theme {
-  --color-utama-50: #eff6ff;
-  --color-utama-100: #dbeafe;
-  --color-utama-600: #2563eb;
-  --color-utama-700: #1d4ed8;
-  --color-utama-800: #1e40af;
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Warna utama: cokelat karamel (mengikuti referensi desain pemilik, 15/11/2026) */
+  --color-utama-50: #fbf6ee;
+  --color-utama-100: #f5e8d3;
+  --color-utama-200: #ebd0a8;
+  --color-utama-300: #ddb177;
+  --color-utama-400: #cc934d;
+  --color-utama-500: #b97b34;
+  --color-utama-600: #a0662a;
+  --color-utama-700: #875424;
+  --color-utama-800: #6c431f;
+  --color-utama-900: #57371c;
+
+  /* Latar krem lembut */
+  --color-krem: #faf6f0;
+
+  /* Peringatan/terlambat: merah bata, agar tetap menonjol di antara warna cokelat.
+     Seluruh kelas "orange-*" di aplikasi otomatis memakai warna ini. */
+  --color-orange-50: #fdf2ef;
+  --color-orange-100: #fadfd8;
+  --color-orange-200: #f3bcae;
+  --color-orange-300: #e99380;
+  --color-orange-400: #da6a52;
+  --color-orange-500: #c44e35;
+  --color-orange-600: #aa3d27;
+  --color-orange-700: #8e3221;
+  --color-orange-800: #73291d;
+  --color-orange-900: #5f241b;
+
+  /* abu-abu teks sedikit lebih gelap agar tetap mudah dibaca di atas latar krem */
+  --color-slate-500: #5b6577;
+
+  --shadow-kartu: 0 1px 2px rgb(87 55 28 / 0.06), 0 4px 16px rgb(87 55 28 / 0.07);
+  --shadow-sampul: 0 2px 4px rgb(0 0 0 / 0.12), 0 8px 20px rgb(87 55 28 / 0.18);
+
+  --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 html, body, #root { min-height: 100%; }
-body { @apply bg-slate-50 text-slate-800 antialiased; }
+body { @apply bg-krem text-slate-800 antialiased; }
+
+/* Gulir samping tanpa batang gulir (deretan sampul buku, tombol kategori) */
+.tanpa-scrollbar { scrollbar-width: none; }
+.tanpa-scrollbar::-webkit-scrollbar { display: none; }
 
 /* Halaman ramah cetak: bukti peminjaman dan laporan */
 @media print {

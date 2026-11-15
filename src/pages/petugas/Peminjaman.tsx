@@ -167,7 +167,7 @@ export default function Peminjaman() {
 
           {anggota && (
             <table className="mt-3 w-full text-sm">
-              <tbody className="divide-y divide-slate-100 border-y border-slate-100">
+              <tbody className="divide-y divide-utama-100/70 border-y border-slate-100">
                 <tr>
                   <th className="w-2/5 py-2 pr-3 text-left font-medium text-slate-500">Nama</th>
                   <td className="py-2 font-medium">{anggota.nama} <span className="font-normal text-slate-500">({anggota.nomor_induk})</span></td>
@@ -196,7 +196,7 @@ export default function Peminjaman() {
             </table>
           )}
           {anggota && !anggota.boleh_meminjam && (
-            <p className="mt-3 rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-900" role="alert">{anggota.alasan}</p>
+            <p className="mt-3 rounded-xl bg-orange-50 px-3 py-2 text-sm text-orange-900" role="alert">{anggota.alasan}</p>
           )}
         </section>
 
@@ -222,7 +222,7 @@ export default function Peminjaman() {
 
           <div className="mt-3 overflow-x-auto">
             <table className="w-full">
-              <thead className="border-b border-slate-200 bg-slate-50">
+              <thead className="border-b border-utama-100 bg-utama-50/70">
                 <tr>
                   <th className={kelas.th}>No.</th>
                   <th className={kelas.th}>No. Induk</th>
@@ -232,7 +232,7 @@ export default function Peminjaman() {
                   <th className={kelas.th}>Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-utama-100/70">
                 {daftar.length === 0 ? (
                   <BarisInfo kolom={6}>Belum ada buku di daftar.</BarisInfo>
                 ) : (
@@ -272,7 +272,7 @@ export default function Peminjaman() {
         <h2 className="text-lg font-semibold">Peminjaman Terakhir Hari Ini</h2>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-200 bg-slate-50">
+            <thead className="border-b border-utama-100 bg-utama-50/70">
               <tr>
                 <th className={kelas.th}>Waktu</th>
                 <th className={kelas.th}>Anggota</th>
@@ -281,7 +281,7 @@ export default function Peminjaman() {
                 <th className={kelas.th}>Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-utama-100/70">
               {memuatHariIni ? (
                 <BarisInfo kolom={5}>Memuat data...</BarisInfo>
               ) : hariIni.length === 0 ? (
